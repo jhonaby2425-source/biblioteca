@@ -1,0 +1,1902 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' https://accounts.google.com; connect-src 'self' https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com https://drive.google.com https://docs.google.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Biblioteca — Tu Librería Personal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root {
+    --bg: #1a1410;
+    --bg2: #231e18;
+    --bg3: #2e2720;
+    --surface: #332c24;
+    --surface2: #3d342a;
+    --accent: #c9a96e;
+    --accent2: #e8c98a;
+    --accent-dim: rgba(201,169,110,0.15);
+    --text: #f0e8d8;
+    --text2: #b8a88a;
+    --text3: #7a6a52;
+    --red: #d4634a;
+    --green: #5a9e6f;
+    --green-dim: rgba(90,158,111,0.15);
+    --border: rgba(201,169,110,0.12);
+    --border2: rgba(201,169,110,0.25);
+    --shadow: 0 8px 40px rgba(0,0,0,0.5);
+    --reading-bg: #faf6ef;
+    --reading-text: #2c2416;
+    --reading-text2: #6b5a3e;
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'Lora', serif;
+    --font-ui: 'DM Sans', sans-serif;
+    --r: 12px;
+    --r-sm: 6px;
+    --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+    --sidebar-w: 260px;
+    --topbar-h: 60px;
+    --mobile-nav-h: 64px;
+  }
+  .light-mode {
+    --bg: #f5f0e8;
+    --bg2: #ede8dc;
+    --bg3: #e4ddd0;
+    --surface: #ffffff;
+    --surface2: #f9f5ef;
+    --accent: #8b6914;
+    --accent2: #a37c1e;
+    --accent-dim: rgba(139,105,20,0.08);
+    --text: #1e1a13;
+    --text2: #5c4f38;
+    --text3: #9a8a6e;
+    --border: rgba(139,105,20,0.12);
+    --border2: rgba(139,105,20,0.25);
+    --shadow: 0 8px 40px rgba(0,0,0,0.12);
+    --green-dim: rgba(60,120,80,0.1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; font-family: var(--font-ui); background: var(--bg); color: var(--text); transition: background var(--transition), color var(--transition); overflow: hidden; }
+
+  /* ── LAYOUT ── */
+  #app { display: grid; grid-template-columns: var(--sidebar-w) 1fr; grid-template-rows: var(--topbar-h) 1fr; height: 100vh; height: 100dvh; }
+  #app.has-reconnect-banner { grid-template-rows: auto var(--topbar-h) 1fr; }
+
+  /* ── TOPBAR ── */
+  #topbar {
+    grid-column: 1 / -1;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 24px; gap: 16px;
+    position: relative; z-index: 20;
+  }
+  .logo { font-family: var(--font-display); font-size: 22px; color: var(--accent); letter-spacing: 0.02em; flex-shrink: 0; }
+  .logo span { font-style: italic; }
+  .menu-toggle { display: none; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; align-items: center; justify-content: center; flex-shrink: 0; transition: all var(--transition); }
+  .menu-toggle:hover { background: var(--accent-dim); color: var(--accent); }
+  .menu-toggle svg { width: 18px; height: 18px; }
+  .topbar-search { flex: 1; max-width: 400px; position: relative; margin-left: 24px; }
+  .topbar-search input {
+    width: 100%; padding: 8px 16px 8px 40px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 50px; color: var(--text); font-family: var(--font-ui); font-size: 14px;
+    outline: none; transition: border var(--transition);
+  }
+  .topbar-search input:focus { border-color: var(--accent); }
+  .topbar-search input::placeholder { color: var(--text3); }
+  .topbar-search svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--text3); width: 16px; height: 16px; }
+  .topbar-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .btn-icon {
+    width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border2);
+    background: transparent; color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all var(--transition); flex-shrink: 0;
+  }
+  .btn-icon:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+  .btn-icon svg { width: 18px; height: 18px; }
+  .btn-primary {
+    background: var(--accent); color: var(--bg); border: none; border-radius: 50px;
+    padding: 8px 18px; font-family: var(--font-ui); font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all var(--transition); display: flex; align-items: center; gap: 6px; white-space: nowrap;
+  }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    background: var(--bg2); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden;
+    transition: transform var(--transition);
+  }
+  .sidebar-section { padding: 20px 16px 8px; }
+  .sidebar-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--r-sm);
+    color: var(--text2); font-size: 14px; cursor: pointer; transition: all var(--transition); margin-bottom: 2px;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--accent-dim); color: var(--text); }
+  .nav-item:active { background: var(--accent-dim); }
+  .nav-item.active { background: var(--accent-dim); color: var(--accent); font-weight: 500; }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .nav-badge { margin-left: auto; background: var(--accent); color: var(--bg); border-radius: 50px; font-size: 11px; padding: 1px 7px; font-weight: 500; }
+  .sidebar-genres { padding: 0 16px 16px; overflow-y: auto; flex: 1; }
+  .genre-tag {
+    display: inline-flex; align-items: center; padding: 5px 12px; border-radius: 50px;
+    border: 1px solid var(--border); color: var(--text2); font-size: 12px; cursor: pointer;
+    margin: 3px; transition: all var(--transition); user-select: none;
+  }
+  .genre-tag:hover, .genre-tag.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+  /* ── SIDEBAR DATA ACTIONS ── */
+  .sidebar-data-section {
+    padding: 12px 16px 16px;
+    border-top: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .btn-data {
+    width: 100%; display: flex; align-items: center; gap: 8px;
+    padding: 9px 12px; border-radius: var(--r-sm);
+    border: 1px solid var(--border2); background: transparent;
+    color: var(--text2); font-family: var(--font-ui); font-size: 13px; cursor: pointer;
+    transition: all var(--transition); text-align: left;
+  }
+  .btn-data:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+  .btn-data svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  /* ── MAIN ── */
+  #main { overflow-y: auto; background: var(--bg); }
+
+  /* ── LIBRARY VIEW ── */
+  #library-view { padding: 32px; }
+  .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; }
+  .section-title { font-family: var(--font-display); font-size: 24px; color: var(--text); }
+  .section-sub { font-size: 13px; color: var(--text3); }
+  .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 24px; }
+  .book-card { cursor: pointer; transition: transform var(--transition); position: relative; }
+  .book-card:hover { transform: translateY(-4px); }
+  .book-card:hover .book-cover-wrap { box-shadow: 0 16px 48px rgba(0,0,0,0.5); }
+  .book-cover-wrap {
+    position: relative; border-radius: var(--r-sm); overflow: hidden;
+    aspect-ratio: 2/3; box-shadow: var(--shadow);
+    transition: box-shadow var(--transition);
+  }
+  .book-cover {
+    width: 100%; height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 16px; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  /* Photo cover */
+  .book-cover.has-photo {
+    padding: 0;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+  }
+  .book-cover.has-photo .book-cover-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 35%, rgba(0,0,0,0.1) 70%, transparent 100%);
+  }
+  .book-cover.has-photo .book-cover-spine,
+  .book-cover.has-photo .book-cover-icon { display: none; }
+  .book-cover.has-photo .book-cover-title,
+  .book-cover.has-photo .book-cover-author {
+    position: absolute; left: 0; right: 0; z-index: 2;
+  }
+  .book-cover.has-photo .book-cover-title { bottom: 28px; font-size: 13px; padding: 0 10px; }
+  .book-cover.has-photo .book-cover-author { bottom: 12px; font-size: 10px; padding: 0 10px; }
+  .book-cover.has-photo .book-progress-bar { z-index: 3; }
+
+  /* Fallback (no photo) */
+  .book-cover::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(0,0,0,0.2) 100%);
+  }
+  .book-cover.has-photo::before { display: none; }
+  .book-cover-spine { position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: rgba(0,0,0,0.3); }
+  .book-cover-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.5); position: relative; z-index: 1; line-height: 1.3; }
+  .book-cover-author { font-size: 10px; color: rgba(255,255,255,0.75); margin-top: 8px; position: relative; z-index: 1; }
+  .book-cover-icon { font-size: 32px; margin-bottom: 10px; position: relative; z-index: 1; }
+  .book-progress-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: rgba(0,0,0,0.4); }
+  .book-progress-fill { height: 100%; background: var(--accent); transition: width 0.5s ease; }
+  .book-lang-badge {
+    position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6);
+    color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 50px; font-weight: 500; letter-spacing: 0.05em;
+  }
+  /* Times read badge on card */
+  .book-times-badge {
+    position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.65);
+    color: var(--accent2); font-size: 9px; padding: 2px 7px; border-radius: 50px; font-weight: 600; letter-spacing: 0.04em;
+    display: flex; align-items: center; gap: 3px;
+  }
+  .book-info { margin-top: 10px; }
+  .book-title { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.3; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .book-author { font-size: 11px; color: var(--text3); }
+  .book-actions { display: flex; gap: 6px; margin-top: 8px; }
+  .btn-sm {
+    flex: 1; padding: 6px 0; border-radius: var(--r-sm); border: 1px solid var(--border2);
+    background: transparent; color: var(--text2); font-size: 11px; cursor: pointer; transition: all var(--transition); font-family: var(--font-ui);
+  }
+  .btn-sm:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+  .btn-sm.danger:hover { background: rgba(212,99,74,0.15); color: var(--red); border-color: var(--red); }
+  .empty-state { text-align: center; padding: 80px 40px; color: var(--text3); }
+  .empty-state svg { width: 64px; height: 64px; margin-bottom: 16px; color: var(--text3); opacity: 0.4; }
+  .empty-state h3 { font-family: var(--font-display); font-size: 20px; color: var(--text2); margin-bottom: 8px; }
+
+  /* ── READER VIEW ── */
+  #reader-view {
+    display: none; position: fixed; inset: var(--topbar-h) 0 0 var(--sidebar-w);
+    background: var(--reading-bg); color: var(--reading-text); z-index: 10;
+    flex-direction: column;
+  }
+  #reader-view.open { display: flex; }
+  .reader-topbar {
+    display: flex; align-items: center; padding: 0 24px; height: 52px; gap: 12px;
+    background: rgba(250,246,239,0.95); border-bottom: 1px solid rgba(0,0,0,0.08);
+    position: sticky; top: 0; z-index: 5; backdrop-filter: blur(8px);
+    flex-shrink: 0;
+  }
+  .reader-title { font-family: var(--font-display); font-size: 16px; font-style: italic; flex: 1; color: var(--reading-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .reader-controls { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .reader-btn {
+    padding: 6px 14px; border-radius: 50px; border: 1px solid rgba(0,0,0,0.15);
+    background: transparent; color: var(--reading-text2); font-size: 12px; cursor: pointer; transition: all var(--transition);
+    font-family: var(--font-ui); white-space: nowrap;
+  }
+  .reader-btn:hover { background: rgba(0,0,0,0.06); }
+  .reader-btn.accent { background: var(--accent); color: var(--bg); border-color: transparent; }
+  .reader-btn.accent:hover { background: var(--accent2); }
+  .reader-content { flex: 1; overflow-y: auto; display: flex; justify-content: center; padding: 48px 24px 80px; }
+  .reader-paper {
+    max-width: 640px; width: 100%;
+    font-family: var(--font-body); line-height: 1.9; color: var(--reading-text);
+  }
+  .reader-chapter-title {
+    font-family: var(--font-display); font-size: 28px; color: var(--reading-text);
+    margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+  .reader-paper p { margin-bottom: 1.4em; font-size: 18px; text-align: justify; hyphens: auto; }
+  .reader-paper p:first-of-type::first-letter {
+    font-family: var(--font-display); font-size: 4em; float: left; line-height: 0.75;
+    margin: 4px 8px 0 0; color: var(--accent);
+  }
+
+  /* ── READER: GOOGLE DRIVE IFRAME ── */
+  .reader-drive-frame {
+    width: 100%; height: 100%; border: none;
+    background: #fff;
+  }
+  .reader-drive-msg {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 16px; padding: 48px 24px; text-align: center; flex: 1;
+  }
+  .reader-drive-msg svg { width: 56px; height: 56px; color: #4285f4; }
+  .reader-drive-msg h3 { font-family: var(--font-display); font-size: 22px; color: var(--reading-text); }
+  .reader-drive-msg p { color: var(--reading-text2); font-size: 14px; max-width: 360px; line-height: 1.6; }
+  .reader-drive-open {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #4285f4; color: #fff; border: none; border-radius: 50px;
+    padding: 10px 22px; font-family: var(--font-ui); font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all var(--transition); text-decoration: none;
+  }
+  .reader-drive-open:hover { background: #3367d6; transform: translateY(-1px); }
+
+  /* ── READER FOOTER ── */
+  .reader-footer {
+    position: sticky; bottom: 0; background: rgba(250,246,239,0.95); border-top: 1px solid rgba(0,0,0,0.06);
+    padding: 10px 24px; display: flex; align-items: center; gap: 16px; backdrop-filter: blur(8px);
+    flex-shrink: 0; flex-wrap: wrap;
+  }
+  .reader-progress-track { flex: 1; height: 3px; background: rgba(0,0,0,0.1); border-radius: 3px; position: relative; min-width: 60px; }
+  .reader-progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s; }
+  .reader-page-info { font-size: 12px; color: var(--reading-text2); white-space: nowrap; font-family: var(--font-ui); }
+  .font-size-ctrl { display: flex; align-items: center; gap: 6px; }
+  .font-size-ctrl button { width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.15); background: transparent; cursor: pointer; font-size: 14px; color: var(--reading-text2); transition: all var(--transition); }
+  .font-size-ctrl button:hover { background: rgba(0,0,0,0.08); }
+  .font-size-ctrl span { font-size: 12px; color: var(--reading-text2); width: 32px; text-align: center; }
+
+  /* ── MARK AS FINISHED BANNER ── */
+  #finish-banner {
+    display: none;
+    background: linear-gradient(135deg, #1a3a25 0%, #1f4d30 100%);
+    border-top: 1px solid rgba(90,158,111,0.4);
+    padding: 14px 24px;
+    flex-direction: column; gap: 10px;
+    flex-shrink: 0;
+  }
+  #finish-banner.visible { display: flex; }
+  .finish-banner-top { display: flex; align-items: center; gap: 12px; }
+  .finish-banner-icon { font-size: 24px; flex-shrink: 0; }
+  .finish-banner-text { flex: 1; }
+  .finish-banner-title { font-family: var(--font-display); font-size: 15px; color: #a8d8b5; margin-bottom: 2px; }
+  .finish-banner-sub { font-size: 12px; color: rgba(168,216,181,0.7); }
+  .finish-banner-times { font-size: 12px; color: rgba(168,216,181,0.9); font-weight: 500; }
+  .btn-finish {
+    display: flex; align-items: center; gap: 8px; justify-content: center;
+    background: var(--green); color: #fff; border: none; border-radius: 50px;
+    padding: 10px 22px; font-family: var(--font-ui); font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all var(--transition); align-self: flex-start;
+  }
+  .btn-finish:hover { background: #4a8f5f; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(90,158,111,0.4); }
+  .btn-finish:active { transform: translateY(0); }
+  .btn-finish svg { width: 16px; height: 16px; }
+
+  /* ── MODAL ── */
+  #modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100;
+    align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(4px);
+  }
+  #modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--r);
+    width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+    animation: modal-in 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes modal-in { from { opacity: 0; transform: scale(0.95) translateY(20px); } }
+  .modal-header { padding: 24px 24px 0; display: flex; align-items: center; justify-content: space-between; }
+  .modal-title { font-family: var(--font-display); font-size: 20px; color: var(--accent); }
+  .modal-body { padding: 20px 24px 24px; }
+  .form-group { margin-bottom: 18px; }
+  .form-label { display: block; font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+  .form-label-hint { font-size: 11px; color: var(--text3); text-transform: none; letter-spacing: 0; font-weight: 400; margin-left: 6px; }
+  .form-input, .form-textarea, .form-select {
+    width: 100%; padding: 10px 14px; background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: var(--r-sm); color: var(--text); font-family: var(--font-ui); font-size: 14px; outline: none;
+    transition: border var(--transition);
+  }
+  .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--accent); }
+  .form-textarea { resize: vertical; min-height: 160px; line-height: 1.6; font-family: var(--font-body); font-size: 15px; }
+  .form-select option { background: var(--bg2); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .color-picker-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
+  .color-swatch {
+    aspect-ratio: 1; border-radius: 50%; cursor: pointer; border: 2px solid transparent;
+    transition: transform var(--transition), border-color var(--transition);
+  }
+  .color-swatch:hover { transform: scale(1.15); }
+  .color-swatch.selected { border-color: var(--accent); transform: scale(1.2); }
+  .modal-footer { padding: 0 24px 24px; display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+  .btn-cancel { padding: 9px 20px; border-radius: 50px; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-family: var(--font-ui); font-size: 14px; cursor: pointer; transition: all var(--transition); }
+  .btn-cancel:hover { background: var(--bg3); }
+  .btn-submit { padding: 9px 24px; border-radius: 50px; border: none; background: var(--accent); color: var(--bg); font-family: var(--font-ui); font-size: 14px; font-weight: 500; cursor: pointer; transition: all var(--transition); }
+  .btn-submit:hover { background: var(--accent2); }
+
+  /* ── COVER PREVIEW IN MODAL ── */
+  .cover-preview-wrap {
+    display: flex; gap: 12px; align-items: flex-start; margin-top: 10px;
+  }
+  .cover-preview-thumb {
+    width: 60px; height: 90px; border-radius: 4px; overflow: hidden;
+    border: 1px solid var(--border2); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg3); font-size: 22px;
+  }
+  .cover-preview-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .cover-preview-actions { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .btn-fetch-cover {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: var(--r-sm); border: 1px solid var(--border2);
+    background: transparent; color: var(--text2); font-family: var(--font-ui); font-size: 12px; cursor: pointer;
+    transition: all var(--transition); text-align: left;
+  }
+  .btn-fetch-cover:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+  .fetch-cover-status { font-size: 11px; color: var(--text3); padding: 4px 0; }
+
+  /* ── CONTENT TYPE TABS ── */
+  .content-type-tabs {
+    display: flex; gap: 0; margin-bottom: 12px;
+    border: 1px solid var(--border2); border-radius: var(--r-sm); overflow: hidden;
+  }
+  .content-tab {
+    flex: 1; padding: 8px 12px; border: none; background: transparent;
+    color: var(--text2); font-family: var(--font-ui); font-size: 12px; cursor: pointer;
+    transition: all var(--transition); display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .content-tab:not(:last-child) { border-right: 1px solid var(--border2); }
+  .content-tab.active { background: var(--accent-dim); color: var(--accent); font-weight: 500; }
+  .content-tab svg { width: 13px; height: 13px; }
+
+  /* ── DRIVE LINK INPUT ── */
+  .drive-link-section { display: none; }
+  .drive-link-section.active { display: block; }
+  .drive-link-note {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r-sm);
+    padding: 12px; margin-top: 10px; font-size: 12px; color: var(--text2); line-height: 1.6;
+  }
+  .drive-link-note strong { color: var(--accent); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  /* ── STATS BAR ── */
+  .stats-bar { display: flex; gap: 16px; margin-bottom: 28px; overflow-x: auto; padding-bottom: 4px; }
+  .stat-card { flex: 1; min-width: 100px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; }
+  .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 6px; }
+  .stat-value { font-family: var(--font-display); font-size: 28px; color: var(--accent); }
+  .stat-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* ── TOAST ── */
+  #toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--r); padding: 12px 20px; color: var(--text); font-size: 13px; z-index: 300; display: none; box-shadow: 0 8px 32px rgba(0,0,0,0.4); max-width: calc(100vw - 32px); }
+  #toast.show { display: block; animation: toast-in 0.3s ease; }
+  @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } }
+
+  /* ── DRIVE BACKUP ── */
+  .drive-pill-wrap { position: relative; }
+  .drive-pill {
+    display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px;
+    border-radius: 50px; border: 1px solid var(--border2); background: transparent;
+    color: var(--text2); font-family: var(--font-ui); font-size: 12px; cursor: pointer;
+    transition: all var(--transition); white-space: nowrap;
+  }
+  .drive-pill:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+  .drive-pill svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .drive-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); flex-shrink: 0; transition: background var(--transition); }
+  .drive-pill[data-state="connecting"] .drive-dot { background: var(--accent); animation: drive-pulse 1s ease-in-out infinite; }
+  .drive-pill[data-state="connected"] .drive-dot { background: var(--green); }
+  .drive-pill[data-state="error"] .drive-dot { background: var(--red); }
+  @keyframes drive-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .drive-menu {
+    position: absolute; top: calc(100% + 8px); right: 0; min-width: 220px;
+    background: var(--surface); border: 1px solid var(--border2); border-radius: var(--r);
+    box-shadow: var(--shadow); padding: 6px; z-index: 250; display: none; flex-direction: column; gap: 2px;
+  }
+  .drive-menu.open { display: flex; }
+  .drive-menu-item {
+    display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-radius: var(--r-sm);
+    border: none; background: transparent; color: var(--text2); font-family: var(--font-ui); font-size: 13px;
+    cursor: pointer; text-align: left; transition: all var(--transition); width: 100%;
+  }
+  .drive-menu-item:hover { background: var(--accent-dim); color: var(--accent); }
+  .drive-menu-item svg { width: 15px; height: 15px; flex-shrink: 0; }
+  .drive-menu-note { padding: 6px 10px 4px; font-size: 11px; color: var(--text3); border-top: 1px solid var(--border); margin-top: 4px; }
+  .drive-reconnect-banner {
+    grid-column: 1 / -1; display: none; align-items: center; gap: 10px;
+    background: var(--accent-dim); border-bottom: 1px solid var(--border2);
+    color: var(--text); font-size: 13px; padding: 10px 24px; z-index: 15;
+  }
+  .drive-reconnect-banner.show { display: flex; }
+  .drive-reconnect-banner .drive-reconnect-msg { flex: 1; }
+  .drive-reconnect-banner button { font-family: var(--font-ui); font-size: 12px; cursor: pointer; border-radius: 50px; padding: 6px 14px; border: 1px solid var(--border2); background: transparent; color: var(--text2); }
+  .drive-reconnect-banner button.drive-reconnect-act { background: var(--accent); color: var(--bg); border: none; }
+  .drive-reconnect-banner button:hover { opacity: 0.85; }
+  @media (max-width: 768px) {
+    .drive-pill .drive-pill-label { display: none; }
+    .drive-pill { padding: 0 9px; }
+  }
+
+  /* ── MOBILE BOTTOM NAV ── */
+  #mobile-nav {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: var(--mobile-nav-h);
+    background: var(--bg2); border-top: 1px solid var(--border);
+    z-index: 30;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .mobile-nav-inner { display: flex; align-items: center; justify-content: space-around; height: 64px; }
+  .mobile-nav-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; padding: 6px 12px; border-radius: var(--r-sm);
+    border: none; background: transparent; color: var(--text3);
+    font-family: var(--font-ui); font-size: 10px; cursor: pointer;
+    transition: all var(--transition); min-width: 56px;
+  }
+  .mobile-nav-btn svg { width: 20px; height: 20px; }
+  .mobile-nav-btn.active { color: var(--accent); }
+  .mobile-nav-btn span { font-size: 10px; }
+
+  /* ── SIDEBAR OVERLAY (mobile) ── */
+  #sidebar-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    z-index: 25; backdrop-filter: blur(2px);
+  }
+  #sidebar-overlay.open { display: block; animation: fade-in 0.2s ease; }
+  @keyframes fade-in { from { opacity: 0; } }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    :root { --topbar-h: 56px; }
+    #app {
+      grid-template-columns: 1fr;
+      grid-template-rows: var(--topbar-h) 1fr;
+    }
+    #topbar { padding: 0 12px; gap: 10px; }
+    .menu-toggle { display: flex; }
+    .topbar-search { margin-left: 0; }
+    .logo { font-size: 18px; }
+    .btn-primary .btn-label { display: none; }
+    .btn-primary { padding: 8px 12px; border-radius: 50%; width: 36px; height: 36px; justify-content: center; }
+    .btn-primary svg { width: 16px; height: 16px; }
+
+    #sidebar {
+      position: fixed; left: 0; top: var(--topbar-h); bottom: 0;
+      width: min(280px, 85vw);
+      z-index: 26;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      border-right: 1px solid var(--border2);
+    }
+    #sidebar.open { transform: translateX(0); }
+
+    #main { padding-bottom: var(--mobile-nav-h); }
+    #library-view { padding: 20px 16px; }
+    .books-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; }
+    .stats-bar { gap: 10px; }
+    .stat-card { padding: 12px; }
+    .stat-value { font-size: 22px; }
+    .section-title { font-size: 20px; }
+    .form-row { grid-template-columns: 1fr; }
+
+    #reader-view { inset: var(--topbar-h) 0 0 0; }
+    .reader-topbar { padding: 0 12px; gap: 8px; }
+    .reader-controls { gap: 4px; }
+    .reader-btn { padding: 5px 10px; font-size: 11px; }
+    .font-size-ctrl button { width: 26px; height: 26px; }
+    .reader-content { padding: 24px 16px 60px; }
+    .reader-paper p { font-size: 16px; }
+    .reader-chapter-title { font-size: 22px; }
+
+    #mobile-nav { display: block; }
+    #toast { bottom: calc(var(--mobile-nav-h) + 12px); right: 12px; left: 12px; text-align: center; }
+    .finish-banner-top { flex-wrap: wrap; }
+    .btn-finish { width: 100%; justify-content: center; }
+  }
+  @media (max-width: 480px) {
+    .books-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .color-picker-grid { grid-template-columns: repeat(6, 1fr); }
+    #modal-overlay { padding: 0; align-items: flex-end; }
+    .modal { border-radius: var(--r) var(--r) 0 0; max-height: 92vh; animation: sheet-in 0.3s cubic-bezier(0.4,0,0.2,1); }
+    @keyframes sheet-in { from { transform: translateY(100%); } }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- DRIVE RECONNECT BANNER -->
+  <div class="drive-reconnect-banner" id="drive-reconnect-banner">
+    <span class="drive-reconnect-msg">⚠️ No se pudo reconectar automáticamente con Google Drive. Tus libros siguen a salvo en este dispositivo.</span>
+    <button class="drive-reconnect-act" onclick="driveConnect()">Reconectar</button>
+    <button onclick="dismissReconnectBanner()">Descartar</button>
+  </div>
+
+  <!-- TOPBAR -->
+  <header id="topbar">
+    <button class="menu-toggle" onclick="toggleSidebar()" id="menu-toggle-btn" aria-label="Abrir menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="logo">Biblio<span>teca</span></div>
+    <div class="topbar-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Buscar libros, autores..." id="search-input" oninput="filterBooks()">
+    </div>
+    <div class="topbar-actions">
+      <div class="drive-pill-wrap">
+        <button class="drive-pill" id="drive-pill" data-state="off" onclick="onDrivePillClick()" title="Google Drive backup">
+          <span class="drive-dot" id="drive-dot"></span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 19h20L12 2z" opacity="0"/><path d="M7.71 3.5 1.15 15l3.43 6L11.14 9.5z"/><path d="M16.29 3.5H7.71L1.15 15h8.58z" opacity="0"/><path d="M9.14 21h9.71l3.43-6h-9.71z"/><path d="M16.29 3.5 22.86 15h-3.43l-6.57-11.5z"/></svg>
+          <span class="drive-pill-label" id="drive-pill-label">Drive</span>
+        </button>
+        <div class="drive-menu" id="drive-menu">
+          <button class="drive-menu-item" id="drive-menu-connect" onclick="driveMenuAction('connect')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Conectar Google Drive
+          </button>
+          <button class="drive-menu-item" id="drive-menu-backup" onclick="driveMenuAction('backup')" style="display:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Respaldar ahora
+          </button>
+          <button class="drive-menu-item" id="drive-menu-restore" onclick="driveMenuAction('restore')" style="display:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 8 7 8"/></svg>
+            Restaurar desde Drive
+          </button>
+          <button class="drive-menu-item" id="drive-menu-disconnect" onclick="driveMenuAction('disconnect')" style="display:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+            Desconectar
+          </button>
+          <div class="drive-menu-note" id="drive-menu-status">Sin conectar — tus libros solo viven en este dispositivo.</div>
+        </div>
+      </div>
+      <button class="btn-icon" onclick="toggleTheme()" title="Cambiar tema" id="theme-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+      <button class="btn-primary" onclick="openAddModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span class="btn-label">Agregar Libro</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- SIDEBAR OVERLAY (mobile) -->
+  <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Biblioteca</div>
+      <div class="nav-item active" onclick="setFilter('all',this);closeSidebar()" id="nav-all">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Todos los libros
+        <span class="nav-badge" id="count-all">0</span>
+      </div>
+      <div class="nav-item" onclick="setFilter('es',this);closeSidebar()" id="nav-es">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        En Español
+        <span class="nav-badge" id="count-es">0</span>
+      </div>
+      <div class="nav-item" onclick="setFilter('en',this);closeSidebar()" id="nav-en">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        In English
+        <span class="nav-badge" id="count-en">0</span>
+      </div>
+      <div class="nav-item" onclick="setFilter('reading',this);closeSidebar()" id="nav-reading">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Leyendo ahora
+      </div>
+      <div class="nav-item" onclick="setFilter('finished',this);closeSidebar()" id="nav-finished">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Terminados
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Géneros</div>
+    </div>
+    <div class="sidebar-genres" id="genres-list"></div>
+
+    <!-- IMPORT / EXPORT -->
+    <div class="sidebar-data-section">
+      <div class="sidebar-label" style="padding:0 0 4px;">Mis datos</div>
+      <button class="btn-data" onclick="exportLibrary()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar biblioteca (.json)
+      </button>
+      <button class="btn-data" onclick="triggerImport()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Importar biblioteca (.json)
+      </button>
+      <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="importLibrary(event)">
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main id="main">
+    <div id="library-view">
+      <div class="stats-bar" id="stats-bar"></div>
+      <div class="section-header">
+        <div>
+          <div class="section-title" id="section-title">Mi Biblioteca</div>
+          <div class="section-sub" id="section-sub">Tu colección personal de libros e historias</div>
+        </div>
+        <div id="view-toggle" style="display:flex;gap:6px;">
+          <button class="btn-sm" style="flex:0;padding:6px 12px;" onclick="setViewMode('grid')" id="view-grid">⊞</button>
+          <button class="btn-sm" style="flex:0;padding:6px 12px;" onclick="setViewMode('list')" id="view-list">☰</button>
+        </div>
+      </div>
+      <div class="books-grid" id="books-grid"></div>
+    </div>
+  </main>
+</div>
+
+<!-- READER VIEW -->
+<div id="reader-view">
+  <div class="reader-topbar">
+    <button class="reader-btn" onclick="closeReader()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="display:inline;vertical-align:-2px;margin-right:4px"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Biblioteca
+    </button>
+    <div class="reader-title" id="reader-title"></div>
+    <div class="reader-controls">
+      <div class="font-size-ctrl" id="font-size-ctrl">
+        <button onclick="changeFontSize(-1)">A−</button>
+        <span id="font-size-display">18</span>
+        <button onclick="changeFontSize(1)">A+</button>
+      </div>
+      <button class="reader-btn" onclick="toggleReaderTheme()" id="reader-theme-btn">☽ Noche</button>
+    </div>
+  </div>
+  <!-- Text content -->
+  <div class="reader-content" id="reader-content" onscroll="updateReadingProgress()">
+    <div class="reader-paper" id="reader-paper"></div>
+  </div>
+  <!-- Google Drive content -->
+  <div id="reader-drive-area" style="display:none;flex:1;flex-direction:column;">
+    <div class="reader-drive-msg" id="reader-drive-msg">
+      <svg viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>
+      <h3 id="drive-book-title">Libro en Google Drive</h3>
+      <p id="drive-book-desc">Este libro está vinculado a Google Drive. Haz clic para abrirlo en una nueva pestaña, o visualízalo abajo si el archivo lo permite.</p>
+      <a id="drive-open-link" class="reader-drive-open" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Abrir en Google Drive
+      </a>
+    </div>
+    <iframe id="reader-drive-frame" class="reader-drive-frame" style="display:none;" allowfullscreen></iframe>
+  </div>
+
+  <!-- Footer (shown for text books) -->
+  <div class="reader-footer" id="reader-footer">
+    <div class="reader-page-info" id="reader-page-info">0%</div>
+    <div class="reader-progress-track">
+      <div class="reader-progress-fill" id="reader-progress-fill" style="width:0%"></div>
+    </div>
+    <div class="reader-page-info" id="reader-time-left"></div>
+  </div>
+
+  <!-- Mark as Finished Banner -->
+  <div id="finish-banner">
+    <div class="finish-banner-top">
+      <div class="finish-banner-icon">🎉</div>
+      <div class="finish-banner-text">
+        <div class="finish-banner-title">¿Terminaste de leer este libro?</div>
+        <div class="finish-banner-sub" id="finish-banner-sub">Confirma para registrar tu lectura completada</div>
+      </div>
+      <button class="btn-finish" onclick="confirmFinished()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        ¡Terminé de leerlo!
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Agregar Nuevo Libro</div>
+      <button class="btn-icon" onclick="closeModal()" style="width:32px;height:32px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Título *</label>
+          <input class="form-input" id="f-title" placeholder="Nombre del libro">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Autor</label>
+          <input class="form-input" id="f-author" placeholder="Nombre del autor">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Idioma</label>
+          <select class="form-select" id="f-lang">
+            <option value="es">🇪🇸 Español</option>
+            <option value="en">🇺🇸 English</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="pt">🇧🇷 Português</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="other">🌐 Otro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Género</label>
+          <input class="form-input" id="f-genre" placeholder="Ej: Novela, Romance, Sci-Fi">
+        </div>
+      </div>
+
+      <!-- COVER IMAGE SECTION -->
+      <div class="form-group">
+        <label class="form-label">Portada / Imagen del libro
+          <span class="form-label-hint">— URL de imagen o búsqueda automática</span>
+        </label>
+        <div class="cover-preview-wrap">
+          <div class="cover-preview-thumb" id="cover-preview-thumb">📖</div>
+          <div class="cover-preview-actions">
+            <input class="form-input" id="f-cover-url" placeholder="https://... URL de imagen de portada" oninput="onCoverUrlChange()">
+            <button class="btn-fetch-cover" onclick="fetchCoverAuto()" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              Buscar portada automáticamente
+            </button>
+            <div class="fetch-cover-status" id="fetch-cover-status"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Color de portada <span class="form-label-hint">— usado si no hay imagen</span></label>
+        <div class="color-picker-grid" id="color-picker"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Emoji / Icono de portada <span class="form-label-hint">— usado si no hay imagen</span></label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;" id="emoji-picker"></div>
+      </div>
+
+      <!-- CONTENT TYPE TABS -->
+      <div class="form-group">
+        <label class="form-label">Contenido</label>
+        <div class="content-type-tabs">
+          <button class="content-tab active" id="tab-text" onclick="switchContentTab('text')" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Texto del libro
+          </button>
+          <button class="content-tab" id="tab-drive" onclick="switchContentTab('drive')" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            Google Drive
+          </button>
+        </div>
+
+        <!-- Text content -->
+        <div id="content-text-section">
+          <textarea class="form-textarea" id="f-content" placeholder="Pega aquí el texto completo de tu libro o historia..."></textarea>
+        </div>
+
+        <!-- Drive link -->
+        <div class="drive-link-section" id="content-drive-section">
+          <input class="form-input" id="f-drive-url" placeholder="https://drive.google.com/file/d/... o https://docs.google.com/...">
+          <div class="drive-link-note">
+            <strong>Cómo obtener el enlace:</strong><br>
+            1. Abre el archivo en Google Drive<br>
+            2. Clic en <strong>Compartir</strong> → <strong>Copiar enlace</strong><br>
+            3. Asegúrate de que el acceso esté en <strong>"Cualquier persona con el enlace"</strong><br><br>
+            Funciona con Google Docs, PDFs y otros documentos de Drive. El libro se abrirá en el lector integrado o en una nueva pestaña.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Estado de lectura</label>
+        <select class="form-select" id="f-status">
+          <option value="unread">Por leer</option>
+          <option value="reading">Leyendo</option>
+          <option value="finished">Terminado</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-submit" onclick="saveBook()">Guardar Libro</button>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav id="mobile-nav">
+  <div class="mobile-nav-inner">
+    <button class="mobile-nav-btn active" id="mob-all" onclick="mobileFilter('all',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span>Todos</span>
+    </button>
+    <button class="mobile-nav-btn" id="mob-reading" onclick="mobileFilter('reading',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      <span>Leyendo</span>
+    </button>
+    <button class="mobile-nav-btn" id="mob-add" onclick="openAddModal()" style="color:var(--accent)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      <span>Agregar</span>
+    </button>
+    <button class="mobile-nav-btn" id="mob-finished" onclick="mobileFilter('finished',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>Terminados</span>
+    </button>
+    <button class="mobile-nav-btn" id="mob-menu" onclick="toggleSidebar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <span>Más</span>
+    </button>
+  </div>
+</nav>
+
+<div id="toast"></div>
+
+<script>
+const COLORS = [
+  '#8B2252','#C45C26','#B8860B','#2E6F40','#1B5E7A','#3D3585','#7B3F6E','#4A3728',
+  '#D4546A','#E87D3E','#E8B84B','#4CAF7A','#3A9CC1','#6B5BC4','#B05D9E','#8D6E63',
+  '#FF6B9D','#FF9F6B','#FFD166','#06D6A0','#4CC9F0','#7C4DFF','#F72585','#8338EC'
+];
+const EMOJIS = ['📖','📚','✨','🌟','🦋','🌹','🗡️','🏰','🌊','🌙','⚡','🔮','🌺','🎭','🦅','🐺','🍂','❄️','🔥','💎','🎪','🌌','🏔️','🎯'];
+
+let books = JSON.parse(localStorage.getItem('biblioteca_books') || '[]');
+let currentFilter = 'all';
+let currentFontSize = 18;
+let editingId = null;
+let selectedColor = COLORS[0];
+let selectedEmoji = EMOJIS[0];
+let readerNight = false;
+let currentBookId = null;
+let activeContentTab = 'text';
+
+/* ── COVER IMAGE PREVIEW ── */
+function onCoverUrlChange() {
+  const url = document.getElementById('f-cover-url').value.trim();
+  updateCoverPreview(url);
+}
+
+function updateCoverPreview(url, emoji) {
+  const thumb = document.getElementById('cover-preview-thumb');
+  if (url) {
+    thumb.innerHTML = `<img src="${url}" onerror="this.parentElement.innerHTML='❌'" alt="portada">`;
+  } else {
+    thumb.innerHTML = emoji || selectedEmoji || '📖';
+  }
+}
+
+async function fetchCoverAuto() {
+  const title = document.getElementById('f-title').value.trim();
+  const author = document.getElementById('f-author').value.trim();
+  if (!title) { showToast('Ingresa el título para buscar la portada'); return; }
+  const status = document.getElementById('fetch-cover-status');
+  status.textContent = '🔍 Buscando portada...';
+  const query = encodeURIComponent((title + ' ' + author).trim());
+  try {
+    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=3`);
+    const data = await res.json();
+    if (data.items && data.items.length > 0) {
+      // Try to find item with image
+      let imgUrl = null;
+      for (const item of data.items) {
+        const img = item.volumeInfo && item.volumeInfo.imageLinks;
+        if (img) {
+          imgUrl = img.extraLarge || img.large || img.medium || img.thumbnail;
+          if (imgUrl) { imgUrl = imgUrl.replace('http://', 'https://'); break; }
+        }
+      }
+      if (imgUrl) {
+        document.getElementById('f-cover-url').value = imgUrl;
+        updateCoverPreview(imgUrl);
+        status.textContent = '✅ Portada encontrada';
+      } else {
+        status.textContent = '⚠️ No se encontró imagen — prueba con una URL manual';
+      }
+    } else {
+      status.textContent = '⚠️ No se encontraron resultados';
+    }
+  } catch(e) {
+    status.textContent = '❌ Error de red al buscar la portada';
+  }
+}
+
+/* ── CONTENT TABS ── */
+function switchContentTab(tab) {
+  activeContentTab = tab;
+  document.getElementById('tab-text').classList.toggle('active', tab === 'text');
+  document.getElementById('tab-drive').classList.toggle('active', tab === 'drive');
+  document.getElementById('content-text-section').style.display = tab === 'text' ? '' : 'none';
+  const driveSection = document.getElementById('content-drive-section');
+  driveSection.classList.toggle('active', tab === 'drive');
+  driveSection.style.display = tab === 'drive' ? 'block' : 'none';
+}
+
+/* ── INIT ── */
+function init() {
+  if (books.length === 0) seedSampleBooks();
+  buildColorPicker();
+  buildEmojiPicker();
+  renderAll();
+  updateDrivePillUI();
+  driveTryAutoReconnect();
+  document.addEventListener('click', (e) => {
+    const wrap = document.querySelector('.drive-pill-wrap');
+    if (wrap && !wrap.contains(e.target)) closeDriveMenu();
+  });
+}
+
+function seedSampleBooks() {
+  books = [
+    { id: Date.now() + 1, title: 'Cien Años de Soledad', author: 'Gabriel García Márquez', lang: 'es', genre: 'Realismo Mágico', color: '#2E6F40', emoji: '🌺', status: 'reading', progress: 42, timesRead: 0,
+      content: `Muchos años después, frente al pelotón de fusilamiento, el coronel Aureliano Buendía había de recordar aquella tarde remota en que su padre lo llevó a conocer el hielo.\n\nMacondo era entonces una aldea de veinte casas de barro y cañabrava construidas a la orilla de un río de aguas diáfanas que se precipitaban por un lecho de piedras pulidas, blancas y enormes como huevos prehistóricos. El mundo era tan reciente, que muchas cosas carecían de nombre, y para mencionarlas había que señalarlas con el dedo.\n\nTodos los años, por el mes de marzo, una familia de gitanos desarrapados plantaba su carpa cerca de la aldea, y con un grande alboroto de pitos y timbales daban a conocer los nuevos inventos. Primero llevaron el imán.\n\nJosé Arcadio Buendía, cuya desaforada imaginación iba siempre más lejos que el ingenio de la naturaleza, y aun más allá del milagro y la magia, pensó que era posible servirse de aquella invención inútil para desentrañar el oro de la tierra.`,
+      addedAt: Date.now() - 86400000 * 10 },
+    { id: Date.now() + 2, title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', lang: 'en', genre: 'Classic', color: '#1B5E7A', emoji: '✨', status: 'finished', progress: 100, timesRead: 2,
+      coverUrl: 'https://books.google.com/books/content?id=iXn5U2IziiEC&printsec=frontcover&img=1&zoom=1&source=gbs_api',
+      content: `In my younger and more vulnerable years my father gave me some advice that I've been turning over in my mind ever since.\n\n"Whenever you feel like criticizing anyone," he told me, "just remember that all the people in this world haven't had the advantages that you've had."\n\nHe didn't say any more, but we've always been unusually communicative in a reserved way, and I understood that he meant a great deal more than that. In consequence, I'm inclined to reserve all judgments, a habit that has opened up many curious natures to me and also made me the victim of not a few veteran bores.`,
+      addedAt: Date.now() - 86400000 * 5 },
+    { id: Date.now() + 3, title: 'La Sombra del Viento', author: 'Carlos Ruiz Zafón', lang: 'es', genre: 'Misterio', color: '#4A3728', emoji: '🗡️', status: 'unread', progress: 0, timesRead: 0,
+      content: `Todavía recuerdo aquel amanecer en que mi padre me llevó por primera vez a visitar el Cementerio de los Libros Olvidados.\n\nDesperté con los primeros resplandores del alba y no volví a dormirme. Mi padre, que era el librero más romántico del mundo, me había despertado a las cuatro de la mañana para llevarme a ese lugar secreto.\n\nNos deslizamos por las calles de una Barcelona atrapada bajo cielos de ceniza, mi padre y yo, como sombras perseguidas por el viento que se colaba entre los escombros de una ciudad que olía a lluvia y sal.`,
+      addedAt: Date.now() - 86400000 * 2 },
+    { id: Date.now() + 4, title: 'El Principito', author: 'Antoine de Saint-Exupéry', lang: 'es', genre: 'Fábula', color: '#B8860B', emoji: '🌟', status: 'finished', progress: 100, timesRead: 3,
+      coverUrl: 'https://books.google.com/books/content?id=m2YOAAAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api',
+      content: `Cuando tenía seis años vi una vez una lámina magnífica en un libro sobre el Bosque Virgen que se llamaba "Historias vividas". Representaba una serpiente boa que se tragaba a una fiera.\n\nAquí está la copia del dibujo. En el libro se decía: "Las serpientes boas tragan su presa entera, sin masticarla. Luego ya no pueden moverse y duermen durante los seis meses que dura su digestión."\n\nReflexioné mucho en ese entonces sobre las aventuras de la jungla y logré trazar, con un lápiz de color, mi primer dibujo.`,
+      addedAt: Date.now() - 86400000 * 20 }
+  ];
+  save();
+}
+
+function buildColorPicker() {
+  const el = document.getElementById('color-picker');
+  el.innerHTML = COLORS.map((c) => `<div class="color-swatch${selectedColor===c?' selected':''}" style="background:${c}" onclick="selectColor('${c}',this)" title="${c}"></div>`).join('');
+}
+
+function buildEmojiPicker() {
+  const el = document.getElementById('emoji-picker');
+  el.innerHTML = EMOJIS.map((e) => `<span style="cursor:pointer;font-size:22px;padding:4px 6px;border-radius:6px;border:2px solid ${selectedEmoji===e?'var(--accent)':'transparent'};transition:all 0.2s" onclick="selectEmoji('${e}',this)">${e}</span>`).join('');
+}
+
+function selectColor(c, el) {
+  selectedColor = c;
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function selectEmoji(e, el) {
+  selectedEmoji = e;
+  document.querySelectorAll('#emoji-picker span').forEach(s => s.style.borderColor = 'transparent');
+  el.style.borderColor = 'var(--accent)';
+  const coverUrl = document.getElementById('f-cover-url').value.trim();
+  if (!coverUrl) updateCoverPreview('', e);
+}
+
+function save() {
+  localStorage.setItem('biblioteca_books', JSON.stringify(books));
+  updateCounts();
+  scheduleDriveBackup();
+}
+
+function updateCounts() {
+  document.getElementById('count-all').textContent = books.length;
+  document.getElementById('count-es').textContent = books.filter(b => b.lang === 'es').length;
+  document.getElementById('count-en').textContent = books.filter(b => b.lang === 'en').length;
+  updateGenres();
+  updateStats();
+}
+
+function updateGenres() {
+  const genres = [...new Set(books.map(b => b.genre).filter(Boolean))];
+  const el = document.getElementById('genres-list');
+  el.innerHTML = genres.map(g => `<span class="genre-tag" onclick="setGenreFilter('${g}',this);closeSidebar()">${g}</span>`).join('');
+}
+
+function updateStats() {
+  const total = books.length;
+  const finished = books.filter(b => b.status === 'finished').length;
+  const reading = books.filter(b => b.status === 'reading').length;
+  const totalReads = books.reduce((s, b) => s + (b.timesRead || 0), 0);
+  const avgPct = total > 0 ? Math.round(books.reduce((s, b) => s + (b.progress || 0), 0) / total) : 0;
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total libros</div><div class="stat-value">${total}</div><div class="stat-sub">en tu biblioteca</div></div>
+    <div class="stat-card"><div class="stat-label">Terminados</div><div class="stat-value">${finished}</div><div class="stat-sub">${reading} leyendo ahora</div></div>
+    <div class="stat-card"><div class="stat-label">Lecturas</div><div class="stat-value">${totalReads}</div><div class="stat-sub">veces leídos total</div></div>
+    <div class="stat-card"><div class="stat-label">Progreso</div><div class="stat-value">${avgPct}%</div><div class="stat-sub">promedio general</div></div>
+  `;
+}
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const titles = { all: 'Mi Biblioteca', es: 'Libros en Español', en: 'Books in English', reading: 'Leyendo Ahora', finished: 'Libros Terminados' };
+  document.getElementById('section-title').textContent = titles[f] || 'Mi Biblioteca';
+  renderBooks();
+}
+
+function setGenreFilter(g, el) {
+  currentFilter = 'genre:' + g;
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.genre-tag').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById('section-title').textContent = g;
+  renderBooks();
+}
+
+function mobileFilter(f, btn) {
+  document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const map = { all: 'nav-all', reading: 'nav-reading', finished: 'nav-finished' };
+  setFilter(f, document.getElementById(map[f]));
+}
+
+function filterBooks() { renderBooks(); }
+
+function getFilteredBooks() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  let filtered = books;
+  if (currentFilter === 'es') filtered = filtered.filter(b => b.lang === 'es');
+  else if (currentFilter === 'en') filtered = filtered.filter(b => b.lang === 'en');
+  else if (currentFilter === 'reading') filtered = filtered.filter(b => b.status === 'reading');
+  else if (currentFilter === 'finished') filtered = filtered.filter(b => b.status === 'finished');
+  else if (currentFilter.startsWith('genre:')) filtered = filtered.filter(b => b.genre === currentFilter.slice(6));
+  if (q) filtered = filtered.filter(b => b.title.toLowerCase().includes(q) || (b.author||'').toLowerCase().includes(q) || (b.genre||'').toLowerCase().includes(q));
+  return filtered;
+}
+
+function getLangFlag(lang) {
+  const flags = { es: '🇪🇸', en: '🇺🇸', fr: '🇫🇷', pt: '🇧🇷', de: '🇩🇪' };
+  return flags[lang] || '🌐';
+}
+
+function getStatusLabel(s) {
+  if (s === 'reading') return '📖 Leyendo';
+  if (s === 'finished') return '✅ Terminado';
+  return '📋 Por leer';
+}
+
+function renderBooks() {
+  const filtered = getFilteredBooks();
+  const grid = document.getElementById('books-grid');
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><h3>No hay libros aquí</h3><p style="font-size:13px;margin-top:8px;">Agrega tu primer libro con el botón de arriba</p></div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(b => {
+    const hasCover = b.coverUrl && b.coverUrl.trim();
+    const isDrive = b.driveUrl && b.driveUrl.trim();
+    const timesRead = b.timesRead || 0;
+    const coverStyle = hasCover ? `background-image:url('${b.coverUrl}');background:${b.color};` : `background:${b.color};`;
+    const coverClass = hasCover ? 'book-cover has-photo' : 'book-cover';
+    const timesReadBadge = timesRead > 0 ? `<div class="book-times-badge">📖×${timesRead}</div>` : '';
+    const driveBadge = isDrive ? `<div style="position:absolute;bottom:12px;right:8px;background:rgba(66,133,244,0.85);color:#fff;font-size:8px;padding:2px 5px;border-radius:4px;font-weight:600;letter-spacing:0.04em;">Drive</div>` : '';
+    return `
+    <div class="book-card" id="card-${b.id}">
+      <div class="book-cover-wrap" onclick="openReader(${b.id})">
+        <div class="${coverClass}" style="${coverStyle}">
+          ${hasCover ? '<div class="book-cover-overlay"></div>' : ''}
+          ${!hasCover ? '<div class="book-cover-spine"></div>' : ''}
+          ${!hasCover ? `<div class="book-cover-icon">${b.emoji || '📖'}</div>` : ''}
+          <div class="book-cover-title">${b.title}</div>
+          <div class="book-cover-author">${b.author || ''}</div>
+          <div class="book-progress-bar"><div class="book-progress-fill" style="width:${b.progress||0}%"></div></div>
+        </div>
+        <div class="book-lang-badge">${getLangFlag(b.lang)}</div>
+        ${timesReadBadge}
+        ${driveBadge}
+      </div>
+      <div class="book-info">
+        <div class="book-title" title="${b.title}">${b.title}</div>
+        <div class="book-author">${b.author || 'Autor desconocido'} ${b.genre ? '· ' + b.genre : ''}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:3px;">${getStatusLabel(b.status)}${b.progress > 0 && b.status !== 'finished' ? ' · ' + b.progress + '%' : ''}${timesRead > 0 ? ' · leído ' + timesRead + 'x' : ''}</div>
+      </div>
+      <div class="book-actions">
+        <button class="btn-sm" onclick="openReader(${b.id})">${isDrive ? '📂 Abrir' : 'Leer'}</button>
+        <button class="btn-sm" onclick="openEditModal(${b.id})">✏️</button>
+        <button class="btn-sm danger" onclick="deleteBook(${b.id})">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAll() { renderBooks(); updateCounts(); }
+
+function openAddModal() {
+  editingId = null;
+  selectedColor = COLORS[0]; selectedEmoji = EMOJIS[0];
+  activeContentTab = 'text';
+  document.getElementById('modal-title').textContent = 'Agregar Nuevo Libro';
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-author').value = '';
+  document.getElementById('f-lang').value = 'es';
+  document.getElementById('f-genre').value = '';
+  document.getElementById('f-content').value = '';
+  document.getElementById('f-drive-url').value = '';
+  document.getElementById('f-cover-url').value = '';
+  document.getElementById('f-status').value = 'unread';
+  document.getElementById('fetch-cover-status').textContent = '';
+  switchContentTab('text');
+  buildColorPicker(); buildEmojiPicker();
+  updateCoverPreview('', selectedEmoji);
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function openEditModal(id) {
+  const b = books.find(b => b.id === id);
+  if (!b) return;
+  editingId = id;
+  selectedColor = b.color || COLORS[0]; selectedEmoji = b.emoji || EMOJIS[0];
+  document.getElementById('modal-title').textContent = 'Editar Libro';
+  document.getElementById('f-title').value = b.title;
+  document.getElementById('f-author').value = b.author || '';
+  document.getElementById('f-lang').value = b.lang;
+  document.getElementById('f-genre').value = b.genre || '';
+  document.getElementById('f-content').value = b.content || '';
+  document.getElementById('f-drive-url').value = b.driveUrl || '';
+  document.getElementById('f-cover-url').value = b.coverUrl || '';
+  document.getElementById('f-status').value = b.status;
+  document.getElementById('fetch-cover-status').textContent = '';
+  // Determine active tab
+  const tab = b.driveUrl ? 'drive' : 'text';
+  switchContentTab(tab);
+  buildColorPicker(); buildEmojiPicker();
+  updateCoverPreview(b.coverUrl || '', b.emoji);
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+function handleOverlayClick(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
+
+/* Convert Google Drive share URL to embed/preview URL */
+function driveUrlToEmbed(url) {
+  if (!url) return null;
+  // Google Docs
+  if (url.includes('docs.google.com/document')) {
+    const m = url.match(/\/d\/([^/]+)/);
+    if (m) return `https://docs.google.com/document/d/${m[1]}/preview`;
+  }
+  // Google Drive file
+  const m = url.match(/\/file\/d\/([^/]+)/);
+  if (m) return `https://drive.google.com/file/d/${m[1]}/preview`;
+  // drive.google.com/open?id=
+  const m2 = url.match(/[?&]id=([^&]+)/);
+  if (m2) return `https://drive.google.com/file/d/${m2[1]}/preview`;
+  return url; // fallback
+}
+
+function saveBook() {
+  const title = document.getElementById('f-title').value.trim();
+  const content = document.getElementById('f-content').value.trim();
+  const driveUrl = document.getElementById('f-drive-url').value.trim();
+  const coverUrl = document.getElementById('f-cover-url').value.trim();
+
+  if (!title) { showToast('Por favor ingresa un título'); return; }
+  if (activeContentTab === 'text' && !content) { showToast('Por favor agrega el contenido del libro'); return; }
+  if (activeContentTab === 'drive' && !driveUrl) { showToast('Por favor ingresa el enlace de Google Drive'); return; }
+
+  const bookData = {
+    title,
+    author: document.getElementById('f-author').value.trim(),
+    lang: document.getElementById('f-lang').value,
+    genre: document.getElementById('f-genre').value.trim(),
+    content: activeContentTab === 'text' ? content : '',
+    driveUrl: activeContentTab === 'drive' ? driveUrl : '',
+    coverUrl,
+    status: document.getElementById('f-status').value,
+    color: selectedColor,
+    emoji: selectedEmoji
+  };
+
+  if (editingId) {
+    const idx = books.findIndex(b => b.id === editingId);
+    if (idx > -1) {
+      books[idx] = { ...books[idx], ...bookData };
+      if (books[idx].status === 'finished') books[idx].progress = 100;
+    }
+    showToast('✅ Libro actualizado');
+  } else {
+    books.unshift({ id: Date.now(), ...bookData, progress: 0, timesRead: 0, addedAt: Date.now() });
+    showToast('📚 Libro agregado a tu biblioteca');
+  }
+  save(); renderAll(); closeModal();
+}
+
+function deleteBook(id) {
+  if (!confirm('¿Eliminar este libro de tu biblioteca?')) return;
+  books = books.filter(b => b.id !== id);
+  save(); renderAll();
+  if (currentBookId === id) closeReader();
+  showToast('🗑️ Libro eliminado');
+}
+
+/* ── READER ── */
+function openReader(id) {
+  const b = books.find(b => b.id === id);
+  if (!b) return;
+  currentBookId = id;
+
+  // Set title
+  document.getElementById('reader-title').textContent = b.title + (b.author ? ' — ' + b.author : '');
+
+  const isDrive = b.driveUrl && b.driveUrl.trim();
+
+  // Show/hide appropriate panels
+  const textContent = document.getElementById('reader-content');
+  const driveArea = document.getElementById('reader-drive-area');
+  const footer = document.getElementById('reader-footer');
+  const fontCtrl = document.getElementById('font-size-ctrl');
+  const finishBanner = document.getElementById('finish-banner');
+  const themBtn = document.getElementById('reader-theme-btn');
+
+  if (isDrive) {
+    // Drive mode
+    textContent.style.display = 'none';
+    driveArea.style.display = 'flex';
+    footer.style.display = 'none';
+    fontCtrl.style.display = 'none';
+    themBtn.style.display = 'none';
+
+    const embedUrl = driveUrlToEmbed(b.driveUrl);
+    const driveMsg = document.getElementById('reader-drive-msg');
+    const driveFrame = document.getElementById('reader-drive-frame');
+    const openLink = document.getElementById('drive-open-link');
+    document.getElementById('drive-book-title').textContent = b.title;
+    openLink.href = b.driveUrl;
+
+    // Try to embed
+    driveMsg.style.display = 'flex';
+    driveFrame.style.display = 'none';
+    driveFrame.src = '';
+    // Attempt iframe load
+    driveFrame.onload = function() {
+      try {
+        // Show iframe once loaded
+        driveFrame.style.display = 'block';
+        driveMsg.style.display = 'none';
+      } catch(e) {}
+    };
+    driveFrame.onerror = function() {
+      driveFrame.style.display = 'none';
+      driveMsg.style.display = 'flex';
+    };
+    setTimeout(() => {
+      driveFrame.src = embedUrl;
+      // Show frame after short delay; keep msg visible until it loads
+      setTimeout(() => {
+        driveFrame.style.display = 'block';
+        driveMsg.style.display = 'none';
+      }, 1800);
+    }, 100);
+
+    // Show finish banner always for drive books (user confirms manually)
+    const timesRead = b.timesRead || 0;
+    document.getElementById('finish-banner-sub').textContent =
+      timesRead > 0 ? `Ya lo leíste ${timesRead} ${timesRead === 1 ? 'vez' : 'veces'}` : 'Primera vez que lo lees';
+    finishBanner.classList.add('visible');
+
+  } else {
+    // Text mode
+    textContent.style.display = '';
+    driveArea.style.display = 'none';
+    footer.style.display = '';
+    fontCtrl.style.display = '';
+    themBtn.style.display = '';
+
+    const paragraphs = b.content.split('\n').filter(p => p.trim());
+    const paper = document.getElementById('reader-paper');
+    paper.innerHTML = `<div class="reader-chapter-title">${b.emoji || '📖'} ${b.title}</div>` + paragraphs.map(p => `<p>${p}</p>`).join('');
+    paper.style.fontSize = currentFontSize + 'px';
+    const savedScroll = b.scrollTop || 0;
+    setTimeout(() => { textContent.scrollTop = savedScroll; updateReadingProgress(); }, 50);
+
+    // Show finish banner when near end
+    updateFinishBanner(b);
+  }
+
+  document.getElementById('reader-view').classList.add('open');
+  if (b.status === 'unread') { b.status = 'reading'; save(); renderAll(); }
+}
+
+function updateFinishBanner(b) {
+  const finishBanner = document.getElementById('finish-banner');
+  // For text books: show when progress >= 85%
+  if (!b) { finishBanner.classList.remove('visible'); return; }
+  if (b.driveUrl) return; // handled in openReader for drive books
+  const pct = b.progress || 0;
+  const timesRead = b.timesRead || 0;
+  if (pct >= 85) {
+    document.getElementById('finish-banner-sub').textContent =
+      timesRead > 0 ? `Ya lo leíste ${timesRead} ${timesRead === 1 ? 'vez' : 'veces'} — ¿otra ronda?` : 'Primera vez que lo completas';
+    finishBanner.classList.add('visible');
+  } else {
+    finishBanner.classList.remove('visible');
+  }
+}
+
+function confirmFinished() {
+  if (!currentBookId) return;
+  const b = books.find(b => b.id === currentBookId);
+  if (!b) return;
+  b.status = 'finished';
+  b.progress = 100;
+  b.timesRead = (b.timesRead || 0) + 1;
+  save(); renderAll();
+  const times = b.timesRead;
+  const msg = times === 1 ? '¡Primer libro completado! 🎉' : `¡Leído ${times} veces! 🏆`;
+  showToast(`${msg} "${b.title}" marcado como terminado`);
+  // Update banner text
+  document.getElementById('finish-banner-sub').textContent = `Leído ${times} ${times === 1 ? 'vez' : 'veces'} en total — ¡felicidades!`;
+}
+
+function closeReader() {
+  document.getElementById('reader-view').classList.remove('open');
+  // Clear drive frame src to stop loading
+  document.getElementById('reader-drive-frame').src = '';
+  currentBookId = null;
+}
+
+function updateReadingProgress() {
+  const content = document.getElementById('reader-content');
+  const { scrollTop, scrollHeight, clientHeight } = content;
+  const max = scrollHeight - clientHeight;
+  const pct = max > 0 ? Math.round((scrollTop / max) * 100) : 0;
+  document.getElementById('reader-progress-fill').style.width = pct + '%';
+  document.getElementById('reader-page-info').textContent = pct + '%';
+  const wpm = 200;
+  const words = document.getElementById('reader-paper').textContent.split(/\s+/).length;
+  const remaining = Math.max(0, Math.round(words * (1 - pct/100) / wpm));
+  document.getElementById('reader-time-left').textContent = remaining > 0 ? `~${remaining} min restantes` : '¡Terminado!';
+  if (currentBookId) {
+    const b = books.find(b => b.id === currentBookId);
+    if (b) {
+      b.progress = pct; b.scrollTop = scrollTop;
+      if (pct >= 95 && b.status !== 'finished') b.status = 'reading'; // don't auto-finish, let user confirm
+      save();
+      updateFinishBanner(b);
+    }
+  }
+}
+
+function changeFontSize(d) {
+  currentFontSize = Math.max(14, Math.min(28, currentFontSize + d));
+  document.getElementById('reader-paper').style.fontSize = currentFontSize + 'px';
+  document.getElementById('font-size-display').textContent = currentFontSize;
+}
+
+function toggleReaderTheme() {
+  readerNight = !readerNight;
+  const rv = document.getElementById('reader-view');
+  const btn = document.getElementById('reader-theme-btn');
+  if (readerNight) {
+    rv.style.background = '#1a1410'; rv.style.color = '#c8b89a';
+    document.getElementById('reader-paper').style.color = '#c8b89a';
+    const ct = document.querySelector('.reader-chapter-title'); if (ct) ct.style.color = '#c8b89a';
+    document.querySelector('.reader-topbar').style.background = 'rgba(26,20,16,0.95)';
+    document.querySelector('.reader-footer').style.background = 'rgba(26,20,16,0.95)';
+    btn.textContent = '☀️ Día';
+  } else {
+    rv.style.background = ''; rv.style.color = '';
+    document.getElementById('reader-paper').style.color = '';
+    const ct = document.querySelector('.reader-chapter-title'); if (ct) ct.style.color = '';
+    document.querySelector('.reader-topbar').style.background = '';
+    document.querySelector('.reader-footer').style.background = '';
+    btn.textContent = '☽ Noche';
+  }
+}
+
+let lightMode = false;
+function toggleTheme() {
+  lightMode = !lightMode;
+  document.body.classList.toggle('light-mode', lightMode);
+  document.getElementById('theme-btn').title = lightMode ? 'Modo oscuro' : 'Modo claro';
+}
+
+function setViewMode(mode) {
+  const grid = document.getElementById('books-grid');
+  if (mode === 'list') {
+    grid.style.gridTemplateColumns = '1fr';
+    grid.querySelectorAll('.book-card').forEach(c => c.style.display = 'flex');
+  } else {
+    grid.style.gridTemplateColumns = '';
+    grid.querySelectorAll('.book-card').forEach(c => c.style.display = '');
+  }
+}
+
+/* ── SIDEBAR MOBILE TOGGLE ── */
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  const isOpen = sidebar.classList.contains('open');
+  sidebar.classList.toggle('open', !isOpen);
+  overlay.classList.toggle('open', !isOpen);
+}
+function closeSidebar() {
+  const isMobile = window.innerWidth <= 768;
+  if (isMobile) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('open');
+  }
+}
+
+/* ── EXPORT ── */
+function exportLibrary() {
+  const data = { version: '1.0', exportedAt: new Date().toISOString(), books };
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `biblioteca_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast(`📤 Exportados ${books.length} libros`);
+  closeSidebar();
+}
+
+/* ── IMPORT ── */
+function triggerImport() {
+  document.getElementById('import-file-input').click();
+  closeSidebar();
+}
+
+function importLibrary(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      const imported = Array.isArray(data) ? data : (data.books || []);
+      if (!Array.isArray(imported) || imported.length === 0) { showToast('❌ Archivo inválido o vacío'); return; }
+      const validBooks = imported.filter(b => b && b.id && b.title && (b.content || b.driveUrl));
+      if (validBooks.length === 0) { showToast('❌ No se encontraron libros válidos'); return; }
+      const action = confirm(`Se encontraron ${validBooks.length} libro(s).\n\n¿Deseas REEMPLAZAR tu biblioteca actual, o AGREGAR los nuevos libros?\n\nAceptar = Reemplazar\nCancelar = Agregar`);
+      if (action) {
+        books = validBooks;
+        showToast(`📥 Biblioteca importada: ${validBooks.length} libros`);
+      } else {
+        const existingIds = new Set(books.map(b => b.id));
+        const newBooks = validBooks.filter(b => !existingIds.has(b.id));
+        books = [...newBooks, ...books];
+        showToast(`📥 Agregados ${newBooks.length} libro(s) nuevos`);
+      }
+      save(); renderAll();
+    } catch (err) { showToast('❌ Error al leer el archivo JSON'); }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+/* ══════════════════════════════════════════════════════
+   GOOGLE DRIVE BACKUP MODULE
+   Backup, not sync: localStorage (biblioteca_books) is always
+   the source of truth. Drive only ever gets pushed TO, and is
+   only ever pulled FROM on an explicit, confirmed user action.
+   ══════════════════════════════════════════════════════ */
+
+const DRIVE_CONFIG = {
+  // Replace with your OAuth Client ID from Google Cloud Console (see README setup section).
+  CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+  SCOPE: 'https://www.googleapis.com/auth/drive.file',
+  FILENAME: 'biblioteca_backup.json',
+  RECONNECT_FLAG: 'biblioteca_drive_connected',
+  DEBOUNCE_MS: 2500,
+};
+
+const driveState = {
+  tokenClient: null,
+  accessToken: null,
+  tokenExpiresAt: 0,
+  fileId: null,
+  connected: false,
+  connecting: false,
+  lastBackupAt: null,
+  pushInFlight: false,
+  pushQueued: false,
+  debounceTimer: null,
+  errorMsg: null,
+};
+
+function driveConfigured() {
+  return DRIVE_CONFIG.CLIENT_ID && !DRIVE_CONFIG.CLIENT_ID.startsWith('YOUR_GOOGLE_CLIENT_ID');
+}
+
+function driveGetTokenClient() {
+  if (!driveState.tokenClient) {
+    driveState.tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: DRIVE_CONFIG.CLIENT_ID,
+      scope: DRIVE_CONFIG.SCOPE,
+      callback: () => {}, // overridden per-call in driveRequestToken
+    });
+  }
+  return driveState.tokenClient;
+}
+
+function driveRequestToken(silent) {
+  return new Promise((resolve, reject) => {
+    if (!driveConfigured()) {
+      reject(new Error('Google Drive no está configurado todavía (falta el Client ID). Revisa el README.'));
+      return;
+    }
+    if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+      reject(new Error('No se pudo cargar Google Identity Services (revisa tu conexión a internet).'));
+      return;
+    }
+    try {
+      const client = driveGetTokenClient();
+      client.callback = (resp) => {
+        if (resp && resp.error) {
+          reject(new Error('No se pudo obtener acceso a Google Drive: ' + resp.error));
+          return;
+        }
+        if (!resp || !resp.access_token) {
+          reject(new Error('Google no devolvió un token de acceso válido.'));
+          return;
+        }
+        driveState.accessToken = resp.access_token;
+        driveState.tokenExpiresAt = Date.now() + (Number(resp.expires_in || 3600) * 1000);
+        resolve(resp.access_token);
+      };
+      client.error_callback = (err) => {
+        reject(new Error(err && err.message ? err.message : 'La ventana de Google se cerró o falló.'));
+      };
+      client.requestAccessToken({
+        prompt: silent ? '' : 'select_account consent',
+      });
+    } catch (err) {
+      reject(new Error('Error al iniciar la conexión con Google: ' + err.message));
+    }
+  });
+}
+
+async function driveGetValidToken() {
+  const hasTime = driveState.accessToken && (driveState.tokenExpiresAt - Date.now() > 60000);
+  if (hasTime) return driveState.accessToken;
+  return driveRequestToken(true);
+}
+
+async function driveApiFetch(url, options = {}) {
+  const token = await driveGetValidToken();
+  const headers = Object.assign({}, options.headers, { Authorization: `Bearer ${token}` });
+  const res = await fetch(url, Object.assign({}, options, { headers }));
+  if (!res.ok) {
+    let detail = '';
+    try { const j = await res.json(); detail = j.error?.message || ''; } catch (e) {}
+    throw new Error(`Drive API error (${res.status}): ${detail || res.statusText}`);
+  }
+  return res;
+}
+
+async function driveFindFile() {
+  const q = encodeURIComponent(`name = '${DRIVE_CONFIG.FILENAME}' and trashed = false`);
+  const res = await driveApiFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name,modifiedTime)&spaces=drive`);
+  const data = await res.json();
+  return (data.files && data.files.length > 0) ? data.files[0] : null;
+}
+
+async function driveCreateFile(payload) {
+  const boundary = 'biblioteca_boundary_' + Date.now();
+  const metadata = { name: DRIVE_CONFIG.FILENAME, mimeType: 'application/json' };
+  const body =
+    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n` +
+    `--${boundary}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(payload)}\r\n` +
+    `--${boundary}--`;
+  const res = await driveApiFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+    method: 'POST',
+    headers: { 'Content-Type': `multipart/related; boundary=${boundary}` },
+    body,
+  });
+  const data = await res.json();
+  return data.id;
+}
+
+async function driveUpdateFile(fileId, payload) {
+  await driveApiFetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+}
+
+async function driveDownloadFile(fileId) {
+  const res = await driveApiFetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
+  return res.json();
+}
+
+function buildBackupPayload() {
+  return { version: '1.0', exportedAt: new Date().toISOString(), books };
+}
+
+async function pushToDrive() {
+  if (driveState.pushInFlight) { driveState.pushQueued = true; return; }
+  driveState.pushInFlight = true;
+  try {
+    const payload = buildBackupPayload();
+    if (!driveState.fileId) {
+      const existing = await driveFindFile();
+      driveState.fileId = existing ? existing.id : await driveCreateFile(payload);
+      if (existing) await driveUpdateFile(driveState.fileId, payload);
+    } else {
+      await driveUpdateFile(driveState.fileId, payload);
+    }
+    driveState.lastBackupAt = Date.now();
+    driveState.errorMsg = null;
+    updateDrivePillUI();
+  } catch (err) {
+    driveState.errorMsg = err.message;
+    updateDrivePillUI();
+    showToast('⚠️ Error al respaldar en Drive: ' + err.message);
+  } finally {
+    driveState.pushInFlight = false;
+    if (driveState.pushQueued) {
+      driveState.pushQueued = false;
+      pushToDrive();
+    }
+  }
+}
+
+function scheduleDriveBackup() {
+  if (!driveState.connected) return;
+  clearTimeout(driveState.debounceTimer);
+  driveState.debounceTimer = setTimeout(() => { pushToDrive(); }, DRIVE_CONFIG.DEBOUNCE_MS);
+}
+
+async function driveBackupNow() {
+  if (!driveState.connected) return;
+  clearTimeout(driveState.debounceTimer);
+  updateDrivePillUI('connecting');
+  await pushToDrive();
+  if (!driveState.errorMsg) showToast('☁️ Biblioteca respaldada en Google Drive');
+  updateDrivePillUI();
+}
+
+async function driveConnect() {
+  if (!driveConfigured()) {
+    showToast('⚠️ Google Drive aún no está configurado — revisa el README para agregar tu Client ID.');
+    return;
+  }
+  dismissReconnectBanner();
+  driveState.connecting = true;
+  updateDrivePillUI('connecting');
+  try {
+    await driveRequestToken(false);
+    const existing = await driveFindFile();
+    if (existing) {
+      driveState.fileId = existing.id;
+      const wantsRestore = confirm(
+        'Ya existe un respaldo de tu biblioteca en Google Drive.\n\n' +
+        '¿Deseas RESTAURARLO ahora (reemplaza los libros de este dispositivo), ' +
+        'o mantener los libros de este dispositivo y sobrescribir el respaldo de Drive?\n\n' +
+        'Aceptar = Restaurar desde Drive\nCancelar = Mantener este dispositivo y sobrescribir Drive'
+      );
+      if (wantsRestore) {
+        const payload = await driveDownloadFile(driveState.fileId);
+        applyRestoredBooks(payload);
+        showToast('📥 Biblioteca restaurada desde Google Drive');
+      } else {
+        await pushToDrive();
+        showToast('☁️ Google Drive conectado — se sobrescribió el respaldo existente');
+      }
+    } else {
+      driveState.fileId = await driveCreateFile(buildBackupPayload());
+      driveState.lastBackupAt = Date.now();
+      showToast('☁️ Google Drive conectado — primer respaldo creado');
+    }
+    driveState.connected = true;
+    localStorage.setItem(DRIVE_CONFIG.RECONNECT_FLAG, '1');
+  } catch (err) {
+    driveState.errorMsg = err.message;
+    showToast('❌ No se pudo conectar con Google Drive: ' + err.message);
+  } finally {
+    driveState.connecting = false;
+    updateDrivePillUI();
+  }
+}
+
+function driveDisconnect() {
+  try {
+    if (driveState.accessToken && google.accounts && google.accounts.oauth2) {
+      google.accounts.oauth2.revoke(driveState.accessToken, () => {});
+    }
+  } catch (e) {}
+  driveState.accessToken = null;
+  driveState.tokenExpiresAt = 0;
+  driveState.fileId = null;
+  driveState.connected = false;
+  driveState.lastBackupAt = null;
+  driveState.errorMsg = null;
+  localStorage.removeItem(DRIVE_CONFIG.RECONNECT_FLAG);
+  updateDrivePillUI();
+  showToast('🔌 Google Drive desconectado — tus libros permanecen solo en este dispositivo');
+}
+
+async function driveRestore() {
+  if (!driveState.connected) return;
+  const ok = confirm('Esto reemplazará TODOS los libros de este dispositivo con la copia guardada en Google Drive. ¿Continuar?');
+  if (!ok) return;
+  try {
+    updateDrivePillUI('connecting');
+    if (!driveState.fileId) {
+      const existing = await driveFindFile();
+      if (!existing) { showToast('⚠️ No se encontró ningún respaldo en Drive todavía'); updateDrivePillUI(); return; }
+      driveState.fileId = existing.id;
+    }
+    const payload = await driveDownloadFile(driveState.fileId);
+    applyRestoredBooks(payload);
+    showToast('📥 Biblioteca restaurada desde Google Drive');
+  } catch (err) {
+    showToast('❌ Error al restaurar desde Drive: ' + err.message);
+  } finally {
+    updateDrivePillUI();
+  }
+}
+
+function applyRestoredBooks(payload) {
+  // Handle both the current shape ({version, exportedAt, books}) and a bare array (legacy/manual exports).
+  const incoming = Array.isArray(payload) ? payload : (payload && Array.isArray(payload.books) ? payload.books : null);
+  if (!incoming) { showToast('❌ El respaldo de Drive no tiene un formato reconocible'); return; }
+  const validBooks = incoming.filter(b => b && b.id && b.title && (b.content || b.driveUrl || b.content === ''));
+  if (validBooks.length === 0) { showToast('❌ El respaldo de Drive está vacío o es inválido'); return; }
+  books = validBooks;
+  localStorage.setItem('biblioteca_books', JSON.stringify(books));
+  renderAll();
+}
+
+async function driveTryAutoReconnect() {
+  if (localStorage.getItem(DRIVE_CONFIG.RECONNECT_FLAG) !== '1') return;
+  if (!driveConfigured()) return;
+  updateDrivePillUI('connecting');
+  try {
+    await driveRequestToken(true);
+    const existing = await driveFindFile();
+    if (existing) driveState.fileId = existing.id;
+    driveState.connected = true;
+    driveState.errorMsg = null;
+    updateDrivePillUI();
+  } catch (err) {
+    driveState.connected = false;
+    showReconnectBanner();
+    updateDrivePillUI('error');
+  }
+}
+
+/* ── DRIVE UI ── */
+function driveRelativeTime(ts) {
+  if (!ts) return '';
+  const diff = Math.max(0, Date.now() - ts);
+  const mins = Math.round(diff / 60000);
+  if (mins < 1) return 'justo ahora';
+  if (mins < 60) return `hace ${mins} min`;
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return `hace ${hrs} h`;
+  return `hace ${Math.round(hrs / 24)} d`;
+}
+
+function updateDrivePillUI(forceState) {
+  const pill = document.getElementById('drive-pill');
+  const label = document.getElementById('drive-pill-label');
+  const status = document.getElementById('drive-menu-status');
+  const btnConnect = document.getElementById('drive-menu-connect');
+  const btnBackup = document.getElementById('drive-menu-backup');
+  const btnRestore = document.getElementById('drive-menu-restore');
+  const btnDisconnect = document.getElementById('drive-menu-disconnect');
+  let state = forceState || (driveState.errorMsg ? 'error' : (driveState.connected ? 'connected' : (driveState.connecting ? 'connecting' : 'off')));
+  pill.dataset.state = state;
+  if (state === 'connected') {
+    label.textContent = driveState.lastBackupAt ? driveRelativeTime(driveState.lastBackupAt) : 'Conectado';
+    status.textContent = driveState.lastBackupAt ? `Último respaldo: ${driveRelativeTime(driveState.lastBackupAt)}` : 'Conectado — esperando el primer respaldo.';
+  } else if (state === 'connecting') {
+    label.textContent = 'Conectando…';
+    status.textContent = 'Conectando con Google Drive…';
+  } else if (state === 'error') {
+    label.textContent = 'Error';
+    status.textContent = driveState.errorMsg || 'Ocurrió un error con Google Drive.';
+  } else {
+    label.textContent = 'Drive';
+    status.textContent = 'Sin conectar — tus libros solo viven en este dispositivo.';
+  }
+  btnConnect.style.display = driveState.connected ? 'none' : 'flex';
+  btnBackup.style.display = driveState.connected ? 'flex' : 'none';
+  btnRestore.style.display = driveState.connected ? 'flex' : 'none';
+  btnDisconnect.style.display = driveState.connected ? 'flex' : 'none';
+}
+
+function toggleDriveMenu() {
+  document.getElementById('drive-menu').classList.toggle('open');
+}
+function closeDriveMenu() {
+  document.getElementById('drive-menu').classList.remove('open');
+}
+function onDrivePillClick() {
+  if (!driveState.connected) {
+    toggleDriveMenu();
+  } else {
+    toggleDriveMenu();
+  }
+}
+function driveMenuAction(action) {
+  closeDriveMenu();
+  if (action === 'connect') driveConnect();
+  else if (action === 'backup') driveBackupNow();
+  else if (action === 'restore') driveRestore();
+  else if (action === 'disconnect') driveDisconnect();
+}
+function showReconnectBanner() {
+  document.getElementById('app').classList.add('has-reconnect-banner');
+  document.getElementById('drive-reconnect-banner').classList.add('show');
+}
+function dismissReconnectBanner() {
+  document.getElementById('app').classList.remove('has-reconnect-banner');
+  document.getElementById('drive-reconnect-banner').classList.remove('show');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('modal-overlay').classList.contains('open')) closeModal();
+    else if (document.getElementById('reader-view').classList.contains('open')) closeReader();
+    else closeSidebar();
+  }
+});
+
+init();
+</script>
+</body>
+</html>
