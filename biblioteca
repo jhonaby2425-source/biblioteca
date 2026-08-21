@@ -1534,7 +1534,7 @@ function showToast(msg) {
 
 const DRIVE_CONFIG = {
   // Replace with your OAuth Client ID from Google Cloud Console (see README setup section).
-  CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+  CLIENT_ID: '685955252889-099oq519mdlmvg57i9c39crt47o3rs1s.apps.googleusercontent.com',
   SCOPE: 'https://www.googleapis.com/auth/drive.file',
   FILENAME: 'biblioteca_backup.json',
   RECONNECT_FLAG: 'biblioteca_drive_connected',
