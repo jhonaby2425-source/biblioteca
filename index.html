@@ -61,11 +61,9 @@
   }
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; font-family: var(--font-ui); background: var(--bg); color: var(--text); transition: background var(--transition), color var(--transition); overflow: hidden; }
-
   /* ── LAYOUT ── */
   #app { display: grid; grid-template-columns: var(--sidebar-w) 1fr; grid-template-rows: var(--topbar-h) 1fr; height: 100vh; height: 100dvh; }
   #app.has-reconnect-banner { grid-template-rows: auto var(--topbar-h) 1fr; }
-
   /* ── TOPBAR ── */
   #topbar {
     grid-column: 1 / -1;
@@ -104,7 +102,6 @@
   }
   .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
   .btn-primary:active { transform: translateY(0); }
-
   /* ── SIDEBAR ── */
   #sidebar {
     background: var(--bg2); border-right: 1px solid var(--border);
@@ -130,7 +127,6 @@
     margin: 3px; transition: all var(--transition); user-select: none;
   }
   .genre-tag:hover, .genre-tag.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
-
   /* ── SIDEBAR DATA ACTIONS ── */
   .sidebar-data-section {
     padding: 12px 16px 16px;
@@ -146,10 +142,8 @@
   }
   .btn-data:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
   .btn-data svg { width: 15px; height: 15px; flex-shrink: 0; }
-
   /* ── MAIN ── */
   #main { overflow-y: auto; background: var(--bg); }
-
   /* ── LIBRARY VIEW ── */
   #library-view { padding: 32px; }
   .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; }
@@ -189,7 +183,6 @@
   .book-cover.has-photo .book-cover-title { bottom: 28px; font-size: 13px; padding: 0 10px; }
   .book-cover.has-photo .book-cover-author { bottom: 12px; font-size: 10px; padding: 0 10px; }
   .book-cover.has-photo .book-progress-bar { z-index: 3; }
-
   /* Fallback (no photo) */
   .book-cover::before {
     content: ''; position: absolute; inset: 0;
@@ -225,45 +218,64 @@
   .empty-state { text-align: center; padding: 80px 40px; color: var(--text3); }
   .empty-state svg { width: 64px; height: 64px; margin-bottom: 16px; color: var(--text3); opacity: 0.4; }
   .empty-state h3 { font-family: var(--font-display); font-size: 20px; color: var(--text2); margin-bottom: 8px; }
-
   /* ── READER VIEW ── */
   #reader-view {
-    display: none; position: fixed; inset: var(--topbar-h) 0 0 var(--sidebar-w);
+    --reader-bar: rgba(250,246,239,0.96);
+    --reader-line: rgba(0,0,0,0.12);
+    --reader-hover: rgba(0,0,0,0.06);
+    display: none; position: fixed;
+    inset: calc(var(--topbar-h) + var(--banner-h, 0px)) 0 0 var(--sidebar-w);
     background: var(--reading-bg); color: var(--reading-text); z-index: 10;
     flex-direction: column;
+    transition: background var(--transition), color var(--transition);
   }
   #reader-view.open { display: flex; }
+  #reader-view.night {
+    --reading-bg: #1a1410; --reading-text: #e2d5bc; --reading-text2: #b8a88a;
+    --reader-bar: rgba(26,20,16,0.96); --reader-line: rgba(255,255,255,0.14); --reader-hover: rgba(255,255,255,0.08);
+  }
+  /* Focus mode: reader takes the whole viewport, dashboard is collapsed away */
+  #reader-view.focus { inset: 0; z-index: 40; padding-bottom: env(safe-area-inset-bottom, 0px); }
   .reader-topbar {
-    display: flex; align-items: center; padding: 0 24px; height: 52px; gap: 12px;
-    background: rgba(250,246,239,0.95); border-bottom: 1px solid rgba(0,0,0,0.08);
+    display: flex; align-items: center; padding: 0 24px; min-height: 52px; gap: 12px;
+    background: var(--reader-bar); border-bottom: 1px solid var(--reader-line);
     position: sticky; top: 0; z-index: 5; backdrop-filter: blur(8px);
     flex-shrink: 0;
   }
-  .reader-title { font-family: var(--font-display); font-size: 16px; font-style: italic; flex: 1; color: var(--reading-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #reader-view.focus .reader-topbar {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-left: max(24px, env(safe-area-inset-left, 0px));
+    padding-right: max(24px, env(safe-area-inset-right, 0px));
+    min-height: calc(52px + env(safe-area-inset-top, 0px));
+  }
+  .reader-title { font-family: var(--font-display); font-size: 16px; font-style: italic; flex: 1; min-width: 0; color: var(--reading-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .reader-controls { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
   .reader-btn {
-    padding: 6px 14px; border-radius: 50px; border: 1px solid rgba(0,0,0,0.15);
+    display: inline-flex; align-items: center; gap: 6px; min-height: 34px;
+    padding: 6px 14px; border-radius: 50px; border: 1px solid var(--reader-line);
     background: transparent; color: var(--reading-text2); font-size: 12px; cursor: pointer; transition: all var(--transition);
     font-family: var(--font-ui); white-space: nowrap;
   }
-  .reader-btn:hover { background: rgba(0,0,0,0.06); }
+  .reader-btn:hover { background: var(--reader-hover); }
+  .reader-btn[aria-pressed="true"] { background: var(--accent-dim); border-color: var(--accent); color: var(--reading-text); }
   .reader-btn.accent { background: var(--accent); color: var(--bg); border-color: transparent; }
   .reader-btn.accent:hover { background: var(--accent2); }
+  .reader-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
   .reader-content { flex: 1; overflow-y: auto; display: flex; justify-content: center; padding: 48px 24px 80px; }
   .reader-paper {
     max-width: 640px; width: 100%;
     font-family: var(--font-body); line-height: 1.9; color: var(--reading-text);
   }
+  #reader-view.focus .reader-paper { max-width: 720px; }
   .reader-chapter-title {
-    font-family: var(--font-display); font-size: 28px; color: var(--reading-text);
-    margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid rgba(0,0,0,0.08);
+    font-family: var(--font-display); font-size: 28px; font-weight: 400; color: var(--reading-text);
+    margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--reader-line);
   }
   .reader-paper p { margin-bottom: 1.4em; font-size: 18px; text-align: justify; hyphens: auto; }
   .reader-paper p:first-of-type::first-letter {
     font-family: var(--font-display); font-size: 4em; float: left; line-height: 0.75;
     margin: 4px 8px 0 0; color: var(--accent);
   }
-
   /* ── READER: GOOGLE DRIVE IFRAME ── */
   .reader-drive-frame {
     width: 100%; height: 100%; border: none;
@@ -283,21 +295,19 @@
     cursor: pointer; transition: all var(--transition); text-decoration: none;
   }
   .reader-drive-open:hover { background: #3367d6; transform: translateY(-1px); }
-
   /* ── READER FOOTER ── */
   .reader-footer {
-    position: sticky; bottom: 0; background: rgba(250,246,239,0.95); border-top: 1px solid rgba(0,0,0,0.06);
+    position: sticky; bottom: 0; background: var(--reader-bar); border-top: 1px solid var(--reader-line);
     padding: 10px 24px; display: flex; align-items: center; gap: 16px; backdrop-filter: blur(8px);
     flex-shrink: 0; flex-wrap: wrap;
   }
-  .reader-progress-track { flex: 1; height: 3px; background: rgba(0,0,0,0.1); border-radius: 3px; position: relative; min-width: 60px; }
+  .reader-progress-track { flex: 1; height: 3px; background: var(--reader-line); border-radius: 3px; position: relative; min-width: 60px; }
   .reader-progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s; }
   .reader-page-info { font-size: 12px; color: var(--reading-text2); white-space: nowrap; font-family: var(--font-ui); }
   .font-size-ctrl { display: flex; align-items: center; gap: 6px; }
-  .font-size-ctrl button { width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.15); background: transparent; cursor: pointer; font-size: 14px; color: var(--reading-text2); transition: all var(--transition); }
-  .font-size-ctrl button:hover { background: rgba(0,0,0,0.08); }
+  .font-size-ctrl button { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--reader-line); background: transparent; cursor: pointer; font-size: 14px; color: var(--reading-text2); transition: all var(--transition); }
+  .font-size-ctrl button:hover { background: var(--reader-hover); }
   .font-size-ctrl span { font-size: 12px; color: var(--reading-text2); width: 32px; text-align: center; }
-
   /* ── MARK AS FINISHED BANNER ── */
   #finish-banner {
     display: none;
@@ -323,7 +333,6 @@
   .btn-finish:hover { background: #4a8f5f; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(90,158,111,0.4); }
   .btn-finish:active { transform: translateY(0); }
   .btn-finish svg { width: 16px; height: 16px; }
-
   /* ── MODAL ── */
   #modal-overlay {
     display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100;
@@ -364,7 +373,6 @@
   .btn-cancel:hover { background: var(--bg3); }
   .btn-submit { padding: 9px 24px; border-radius: 50px; border: none; background: var(--accent); color: var(--bg); font-family: var(--font-ui); font-size: 14px; font-weight: 500; cursor: pointer; transition: all var(--transition); }
   .btn-submit:hover { background: var(--accent2); }
-
   /* ── COVER PREVIEW IN MODAL ── */
   .cover-preview-wrap {
     display: flex; gap: 12px; align-items: flex-start; margin-top: 10px;
@@ -385,7 +393,6 @@
   }
   .btn-fetch-cover:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
   .fetch-cover-status { font-size: 11px; color: var(--text3); padding: 4px 0; }
-
   /* ── CONTENT TYPE TABS ── */
   .content-type-tabs {
     display: flex; gap: 0; margin-bottom: 12px;
@@ -399,7 +406,6 @@
   .content-tab:not(:last-child) { border-right: 1px solid var(--border2); }
   .content-tab.active { background: var(--accent-dim); color: var(--accent); font-weight: 500; }
   .content-tab svg { width: 13px; height: 13px; }
-
   /* ── DRIVE LINK INPUT ── */
   .drive-link-section { display: none; }
   .drive-link-section.active { display: block; }
@@ -408,25 +414,21 @@
     padding: 12px; margin-top: 10px; font-size: 12px; color: var(--text2); line-height: 1.6;
   }
   .drive-link-note strong { color: var(--accent); }
-
   /* ── SCROLLBAR ── */
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
-
   /* ── STATS BAR ── */
   .stats-bar { display: flex; gap: 16px; margin-bottom: 28px; overflow-x: auto; padding-bottom: 4px; }
   .stat-card { flex: 1; min-width: 100px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; }
   .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 6px; }
   .stat-value { font-family: var(--font-display); font-size: 28px; color: var(--accent); }
   .stat-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
-
   /* ── TOAST ── */
   #toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--r); padding: 12px 20px; color: var(--text); font-size: 13px; z-index: 300; display: none; box-shadow: 0 8px 32px rgba(0,0,0,0.4); max-width: calc(100vw - 32px); }
   #toast.show { display: block; animation: toast-in 0.3s ease; }
   @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } }
-
   /* ── DRIVE BACKUP ── */
   .drive-pill-wrap { position: relative; }
   .drive-pill {
@@ -470,7 +472,6 @@
     .drive-pill .drive-pill-label { display: none; }
     .drive-pill { padding: 0 9px; }
   }
-
   /* ── MOBILE BOTTOM NAV ── */
   #mobile-nav {
     display: none;
@@ -491,7 +492,6 @@
   .mobile-nav-btn svg { width: 20px; height: 20px; }
   .mobile-nav-btn.active { color: var(--accent); }
   .mobile-nav-btn span { font-size: 10px; }
-
   /* ── SIDEBAR OVERLAY (mobile) ── */
   #sidebar-overlay {
     display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
@@ -499,7 +499,6 @@
   }
   #sidebar-overlay.open { display: block; animation: fade-in 0.2s ease; }
   @keyframes fade-in { from { opacity: 0; } }
-
   /* ── RESPONSIVE ── */
   @media (max-width: 768px) {
     :root { --topbar-h: 56px; }
@@ -514,9 +513,8 @@
     .btn-primary .btn-label { display: none; }
     .btn-primary { padding: 8px 12px; border-radius: 50%; width: 36px; height: 36px; justify-content: center; }
     .btn-primary svg { width: 16px; height: 16px; }
-
     #sidebar {
-      position: fixed; left: 0; top: var(--topbar-h); bottom: 0;
+      position: fixed; left: 0; top: calc(var(--topbar-h) + var(--banner-h, 0px)); bottom: 0;
       width: min(280px, 85vw);
       z-index: 26;
       transform: translateX(-100%);
@@ -524,7 +522,6 @@
       border-right: 1px solid var(--border2);
     }
     #sidebar.open { transform: translateX(0); }
-
     #main { padding-bottom: var(--mobile-nav-h); }
     #library-view { padding: 20px 16px; }
     .books-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; }
@@ -533,8 +530,7 @@
     .stat-value { font-size: 22px; }
     .section-title { font-size: 20px; }
     .form-row { grid-template-columns: 1fr; }
-
-    #reader-view { inset: var(--topbar-h) 0 0 0; }
+    #reader-view { inset: calc(var(--topbar-h) + var(--banner-h, 0px)) 0 calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px)) 0; }
     .reader-topbar { padding: 0 12px; gap: 8px; }
     .reader-controls { gap: 4px; }
     .reader-btn { padding: 5px 10px; font-size: 11px; }
@@ -542,7 +538,6 @@
     .reader-content { padding: 24px 16px 60px; }
     .reader-paper p { font-size: 16px; }
     .reader-chapter-title { font-size: 22px; }
-
     #mobile-nav { display: block; }
     #toast { bottom: calc(var(--mobile-nav-h) + 12px); right: 12px; left: 12px; text-align: center; }
     .finish-banner-top { flex-wrap: wrap; }
@@ -555,18 +550,75 @@
     .modal { border-radius: var(--r) var(--r) 0 0; max-height: 92vh; animation: sheet-in 0.3s cubic-bezier(0.4,0,0.2,1); }
     @keyframes sheet-in { from { transform: translateY(100%); } }
   }
+
+  /* ══ ADDITIONS: view toggle, list view, focus mode, a11y ══ */
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .genre-tag { background: transparent; font-family: var(--font-ui); }
+  .book-status { font-size: 10px; color: var(--text3); margin-top: 3px; }
+  .list-only { display: none; }
+  .book-drive-badge {
+    position: absolute; bottom: 12px; right: 8px; background: rgba(66,133,244,0.9); color: #fff;
+    font-size: 8px; padding: 2px 5px; border-radius: 4px; font-weight: 600; letter-spacing: 0.04em;
+  }
+  /* View toggle (segmented control) */
+  .view-toggle { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--border2); border-radius: 50px; background: var(--bg2); flex-shrink: 0; }
+  .view-btn {
+    width: 38px; height: 32px; border: none; border-radius: 50px; background: transparent; color: var(--text3);
+    cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all var(--transition);
+  }
+  .view-btn svg { width: 16px; height: 16px; }
+  .view-btn:hover { color: var(--text); }
+  .view-btn[aria-pressed="true"] { background: var(--accent-dim); color: var(--accent); }
+  /* List view: compact, scannable rows */
+  .books-grid.is-list { grid-template-columns: 1fr; gap: 8px; }
+  .is-list .book-card {
+    display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; column-gap: 16px;
+    padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
+    transition: background var(--transition), border-color var(--transition);
+  }
+  .is-list .book-card:hover { transform: none; background: var(--surface2); border-color: var(--border2); }
+  .is-list .book-cover-wrap, .is-list .book-card:hover .book-cover-wrap { width: 48px; box-shadow: none; }
+  .is-list .book-cover { padding: 0; }
+  .is-list .book-cover-title, .is-list .book-cover-author, .is-list .book-cover-spine,
+  .is-list .book-lang-badge, .is-list .book-times-badge, .is-list .book-drive-badge { display: none; }
+  .is-list .book-cover-icon { font-size: 20px; margin: 0; }
+  .is-list .book-info { margin: 0; min-width: 0; }
+  .is-list .book-title { font-size: 15px; }
+  .is-list .book-author { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .is-list .book-status { font-size: 11px; }
+  .is-list .list-only { display: inline; }
+  .is-list .book-actions { margin: 0; }
+  .is-list .btn-sm { flex: none; min-width: 40px; padding: 8px 12px; font-size: 12px; }
+  @media (max-width: 600px) {
+    .is-list .book-card { grid-template-columns: 48px minmax(0, 1fr); align-items: start; row-gap: 8px; }
+    .is-list .book-cover-wrap { grid-row: 1 / span 2; }
+    .is-list .book-actions { grid-column: 2; }
+  }
+  @media (max-width: 768px) {
+    #reader-view.focus .reader-topbar { padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)); }
+  }
+  @media (max-width: 600px) {
+    .reader-btn-label { display: none; }
+    #reader-view .reader-btn { padding: 6px 10px; }
+  }
+  @media (pointer: coarse) {
+    .btn-sm, .reader-btn, .view-btn { min-height: 44px; }
+    .view-btn { min-width: 44px; }
+    .font-size-ctrl button { width: 44px; height: 44px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  }
 </style>
 </head>
 <body>
 <div id="app">
-
   <!-- DRIVE RECONNECT BANNER -->
   <div class="drive-reconnect-banner" id="drive-reconnect-banner">
     <span class="drive-reconnect-msg">⚠️ No se pudo reconectar automáticamente con Google Drive. Tus libros siguen a salvo en este dispositivo.</span>
     <button class="drive-reconnect-act" onclick="driveConnect()">Reconectar</button>
     <button onclick="dismissReconnectBanner()">Descartar</button>
   </div>
-
   <!-- TOPBAR -->
   <header id="topbar">
     <button class="menu-toggle" onclick="toggleSidebar()" id="menu-toggle-btn" aria-label="Abrir menú">
@@ -575,7 +627,7 @@
     <div class="logo">Biblio<span>teca</span></div>
     <div class="topbar-search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="text" placeholder="Buscar libros, autores..." id="search-input" oninput="filterBooks()">
+      <input type="text" placeholder="Buscar libros, autores..." id="search-input" aria-label="Buscar libros y autores" oninput="filterBooks()">
     </div>
     <div class="topbar-actions">
       <div class="drive-pill-wrap">
@@ -604,7 +656,7 @@
           <div class="drive-menu-note" id="drive-menu-status">Sin conectar — tus libros solo viven en este dispositivo.</div>
         </div>
       </div>
-      <button class="btn-icon" onclick="toggleTheme()" title="Cambiar tema" id="theme-btn">
+      <button class="btn-icon" onclick="toggleTheme()" title="Cambiar tema" aria-label="Cambiar tema" id="theme-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       </button>
       <button class="btn-primary" onclick="openAddModal()">
@@ -613,10 +665,8 @@
       </button>
     </div>
   </header>
-
   <!-- SIDEBAR OVERLAY (mobile) -->
   <div id="sidebar-overlay" onclick="closeSidebar()"></div>
-
   <!-- SIDEBAR -->
   <nav id="sidebar">
     <div class="sidebar-section">
@@ -649,7 +699,6 @@
       <div class="sidebar-label">Géneros</div>
     </div>
     <div class="sidebar-genres" id="genres-list"></div>
-
     <!-- IMPORT / EXPORT -->
     <div class="sidebar-data-section">
       <div class="sidebar-label" style="padding:0 0 4px;">Mis datos</div>
@@ -664,7 +713,6 @@
       <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="importLibrary(event)">
     </div>
   </nav>
-
   <!-- MAIN CONTENT -->
   <main id="main">
     <div id="library-view">
@@ -674,31 +722,38 @@
           <div class="section-title" id="section-title">Mi Biblioteca</div>
           <div class="section-sub" id="section-sub">Tu colección personal de libros e historias</div>
         </div>
-        <div id="view-toggle" style="display:flex;gap:6px;">
-          <button class="btn-sm" style="flex:0;padding:6px 12px;" onclick="setViewMode('grid')" id="view-grid">⊞</button>
-          <button class="btn-sm" style="flex:0;padding:6px 12px;" onclick="setViewMode('list')" id="view-list">☰</button>
+        <div class="view-toggle" id="view-toggle" role="group" aria-label="Modo de vista">
+          <button type="button" class="view-btn" id="view-grid" onclick="setViewMode('grid')" aria-pressed="true" aria-label="Vista de cuadrícula" title="Cuadrícula">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </button>
+          <button type="button" class="view-btn" id="view-list" onclick="setViewMode('list')" aria-pressed="false" aria-label="Vista de lista" title="Lista">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>
+          </button>
         </div>
       </div>
       <div class="books-grid" id="books-grid"></div>
     </div>
   </main>
 </div>
-
 <!-- READER VIEW -->
-<div id="reader-view">
+<div id="reader-view" role="dialog" aria-labelledby="reader-title" aria-modal="true">
   <div class="reader-topbar">
-    <button class="reader-btn" onclick="closeReader()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="display:inline;vertical-align:-2px;margin-right:4px"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-      Biblioteca
+    <button type="button" class="reader-btn" id="reader-close-btn" onclick="closeReader()" aria-label="Volver a la biblioteca">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      <span class="reader-btn-label">Biblioteca</span>
     </button>
     <div class="reader-title" id="reader-title"></div>
     <div class="reader-controls">
       <div class="font-size-ctrl" id="font-size-ctrl">
-        <button onclick="changeFontSize(-1)">A−</button>
-        <span id="font-size-display">18</span>
-        <button onclick="changeFontSize(1)">A+</button>
+        <button type="button" onclick="changeFontSize(-1)" aria-label="Reducir tamaño de letra">A−</button>
+        <span id="font-size-display" aria-live="polite">18</span>
+        <button type="button" onclick="changeFontSize(1)" aria-label="Aumentar tamaño de letra">A+</button>
       </div>
-      <button class="reader-btn" onclick="toggleReaderTheme()" id="reader-theme-btn">☽ Noche</button>
+      <button type="button" class="reader-btn" onclick="toggleReaderTheme()" id="reader-theme-btn" aria-label="Modo nocturno" aria-pressed="false">☽ Noche</button>
+      <button type="button" class="reader-btn" onclick="toggleReaderFocus()" id="reader-focus-btn" aria-pressed="true" aria-label="Modo enfoque: ocultar el panel de la biblioteca" title="Ocultar/mostrar el panel de la biblioteca (tecla F)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        <span class="reader-btn-label">Enfoque</span>
+      </button>
     </div>
   </div>
   <!-- Text content -->
@@ -718,16 +773,14 @@
     </div>
     <iframe id="reader-drive-frame" class="reader-drive-frame" style="display:none;" allowfullscreen></iframe>
   </div>
-
   <!-- Footer (shown for text books) -->
   <div class="reader-footer" id="reader-footer">
     <div class="reader-page-info" id="reader-page-info">0%</div>
-    <div class="reader-progress-track">
+    <div class="reader-progress-track" id="reader-progress-track" role="progressbar" aria-label="Progreso de lectura" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
       <div class="reader-progress-fill" id="reader-progress-fill" style="width:0%"></div>
     </div>
     <div class="reader-page-info" id="reader-time-left"></div>
   </div>
-
   <!-- Mark as Finished Banner -->
   <div id="finish-banner">
     <div class="finish-banner-top">
@@ -743,7 +796,6 @@
     </div>
   </div>
 </div>
-
 <!-- ADD/EDIT MODAL -->
 <div id="modal-overlay" onclick="handleOverlayClick(event)">
   <div class="modal" id="modal">
@@ -781,7 +833,6 @@
           <input class="form-input" id="f-genre" placeholder="Ej: Novela, Romance, Sci-Fi">
         </div>
       </div>
-
       <!-- COVER IMAGE SECTION -->
       <div class="form-group">
         <label class="form-label">Portada / Imagen del libro
@@ -799,7 +850,6 @@
           </div>
         </div>
       </div>
-
       <div class="form-group">
         <label class="form-label">Color de portada <span class="form-label-hint">— usado si no hay imagen</span></label>
         <div class="color-picker-grid" id="color-picker"></div>
@@ -808,7 +858,6 @@
         <label class="form-label">Emoji / Icono de portada <span class="form-label-hint">— usado si no hay imagen</span></label>
         <div style="display:flex;gap:8px;flex-wrap:wrap;" id="emoji-picker"></div>
       </div>
-
       <!-- CONTENT TYPE TABS -->
       <div class="form-group">
         <label class="form-label">Contenido</label>
@@ -822,12 +871,10 @@
             Google Drive
           </button>
         </div>
-
         <!-- Text content -->
         <div id="content-text-section">
           <textarea class="form-textarea" id="f-content" placeholder="Pega aquí el texto completo de tu libro o historia..."></textarea>
         </div>
-
         <!-- Drive link -->
         <div class="drive-link-section" id="content-drive-section">
           <input class="form-input" id="f-drive-url" placeholder="https://drive.google.com/file/d/... o https://docs.google.com/...">
@@ -840,7 +887,6 @@
           </div>
         </div>
       </div>
-
       <div class="form-group">
         <label class="form-label">Estado de lectura</label>
         <select class="form-select" id="f-status">
@@ -856,7 +902,6 @@
     </div>
   </div>
 </div>
-
 <!-- MOBILE BOTTOM NAV -->
 <nav id="mobile-nav">
   <div class="mobile-nav-inner">
@@ -882,9 +927,7 @@
     </button>
   </div>
 </nav>
-
-<div id="toast"></div>
-
+<div id="toast" role="status" aria-live="polite"></div>
 <script>
 const COLORS = [
   '#8B2252','#C45C26','#B8860B','#2E6F40','#1B5E7A','#3D3585','#7B3F6E','#4A3728',
@@ -892,8 +935,22 @@ const COLORS = [
   '#FF6B9D','#FF9F6B','#FFD166','#06D6A0','#4CC9F0','#7C4DFF','#F72585','#8338EC'
 ];
 const EMOJIS = ['📖','📚','✨','🌟','🦋','🌹','🗡️','🏰','🌊','🌙','⚡','🔮','🌺','🎭','🦅','🐺','🍂','❄️','🔥','💎','🎪','🌌','🏔️','🎯'];
-
-let books = JSON.parse(localStorage.getItem('biblioteca_books') || '[]');
+const LS = { books: 'biblioteca_books', view: 'biblioteca_view_mode', focus: 'biblioteca_reader_focus', night: 'biblioteca_reader_night' };
+function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { console.error('localStorage write failed', e); } }
+function loadBooks() {
+  const raw = lsGet(LS.books);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    console.error('Corrupted library data, keeping a raw copy', e);
+    lsSet('biblioteca_books_corrupt_backup', raw);
+    return [];
+  }
+}
+let books = loadBooks();
 let currentFilter = 'all';
 let currentFontSize = 18;
 let editingId = null;
@@ -902,22 +959,37 @@ let selectedEmoji = EMOJIS[0];
 let readerNight = false;
 let currentBookId = null;
 let activeContentTab = 'text';
-
+let viewMode = 'grid';
+let readerFocus = true;
+let readerWordCount = 0;
+let progressTimer = null;
+let lastFocusEl = null;
+const $ = (id) => document.getElementById(id);
+const ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ESC_MAP[c]); }
+function safeUrl(u) { const s = String(u || '').trim(); return /^https?:\/\//i.test(s) ? s : ''; }
+function cssUrl(u) { return u.replace(/['"()\s\\]/g, (c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0')); }
+function safeColor(c) { return /^#[0-9a-f]{3,8}$/i.test(String(c || '')) ? c : '#4A3728'; }
+function clampPct(n) { n = Number(n); return Number.isFinite(n) ? Math.max(0, Math.min(100, Math.round(n))) : 0; }
 /* ── COVER IMAGE PREVIEW ── */
 function onCoverUrlChange() {
   const url = document.getElementById('f-cover-url').value.trim();
   updateCoverPreview(url);
 }
-
 function updateCoverPreview(url, emoji) {
-  const thumb = document.getElementById('cover-preview-thumb');
-  if (url) {
-    thumb.innerHTML = `<img src="${url}" onerror="this.parentElement.innerHTML='❌'" alt="portada">`;
+  const thumb = $('cover-preview-thumb');
+  thumb.textContent = '';
+  const safe = safeUrl(url);
+  if (safe) {
+    const img = document.createElement('img');
+    img.alt = 'Vista previa de la portada';
+    img.onerror = () => { thumb.textContent = '❌'; };
+    img.src = safe;
+    thumb.appendChild(img);
   } else {
-    thumb.innerHTML = emoji || selectedEmoji || '📖';
+    thumb.textContent = emoji || selectedEmoji || '📖';
   }
 }
-
 async function fetchCoverAuto() {
   const title = document.getElementById('f-title').value.trim();
   const author = document.getElementById('f-author').value.trim();
@@ -952,7 +1024,6 @@ async function fetchCoverAuto() {
     status.textContent = '❌ Error de red al buscar la portada';
   }
 }
-
 /* ── CONTENT TABS ── */
 function switchContentTab(tab) {
   activeContentTab = tab;
@@ -963,12 +1034,18 @@ function switchContentTab(tab) {
   driveSection.classList.toggle('active', tab === 'drive');
   driveSection.style.display = tab === 'drive' ? 'block' : 'none';
 }
-
 /* ── INIT ── */
 function init() {
+  viewMode = lsGet(LS.view) === 'list' ? 'list' : 'grid';
+  readerFocus = lsGet(LS.focus) !== '0';
+  readerNight = lsGet(LS.night) === '1';
   if (books.length === 0) seedSampleBooks();
   buildColorPicker();
   buildEmojiPicker();
+  makeNavItemsKeyboardAccessible();
+  syncViewToggle();
+  bindGridActions();
+  observeReconnectBanner();
   renderAll();
   updateDrivePillUI();
   driveTryAutoReconnect();
@@ -977,7 +1054,35 @@ function init() {
     if (wrap && !wrap.contains(e.target)) closeDriveMenu();
   });
 }
-
+function makeNavItemsKeyboardAccessible() {
+  document.querySelectorAll('.nav-item').forEach((el) => {
+    el.setAttribute('role', 'button');
+    el.tabIndex = 0;
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
+    });
+  });
+}
+function syncBannerHeight() {
+  const banner = $('drive-reconnect-banner');
+  const h = banner.classList.contains('show') ? banner.offsetHeight : 0;
+  document.documentElement.style.setProperty('--banner-h', h + 'px');
+}
+function observeReconnectBanner() {
+  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(syncBannerHeight).observe($('drive-reconnect-banner'));
+  syncBannerHeight();
+}
+function bindGridActions() {
+  $('books-grid').addEventListener('click', (e) => {
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+    const book = books.find((x) => String(x.id) === el.dataset.id);
+    if (!book) return;
+    if (el.dataset.action === 'open') openReader(book.id);
+    else if (el.dataset.action === 'edit') openEditModal(book.id);
+    else if (el.dataset.action === 'delete') deleteBook(book.id);
+  });
+}
 function seedSampleBooks() {
   books = [
     { id: Date.now() + 1, title: 'Cien Años de Soledad', author: 'Gabriel García Márquez', lang: 'es', genre: 'Realismo Mágico', color: '#2E6F40', emoji: '🌺', status: 'reading', progress: 42, timesRead: 0,
@@ -997,23 +1102,19 @@ function seedSampleBooks() {
   ];
   save();
 }
-
 function buildColorPicker() {
   const el = document.getElementById('color-picker');
   el.innerHTML = COLORS.map((c) => `<div class="color-swatch${selectedColor===c?' selected':''}" style="background:${c}" onclick="selectColor('${c}',this)" title="${c}"></div>`).join('');
 }
-
 function buildEmojiPicker() {
   const el = document.getElementById('emoji-picker');
   el.innerHTML = EMOJIS.map((e) => `<span style="cursor:pointer;font-size:22px;padding:4px 6px;border-radius:6px;border:2px solid ${selectedEmoji===e?'var(--accent)':'transparent'};transition:all 0.2s" onclick="selectEmoji('${e}',this)">${e}</span>`).join('');
 }
-
 function selectColor(c, el) {
   selectedColor = c;
   document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
   el.classList.add('selected');
 }
-
 function selectEmoji(e, el) {
   selectedEmoji = e;
   document.querySelectorAll('#emoji-picker span').forEach(s => s.style.borderColor = 'transparent');
@@ -1021,13 +1122,22 @@ function selectEmoji(e, el) {
   const coverUrl = document.getElementById('f-cover-url').value.trim();
   if (!coverUrl) updateCoverPreview('', e);
 }
-
-function save() {
-  localStorage.setItem('biblioteca_books', JSON.stringify(books));
-  updateCounts();
+/* persist(): write to localStorage + queue Drive backup. save(): persist + refresh derived UI. */
+function persist() {
+  try {
+    localStorage.setItem(LS.books, JSON.stringify(books));
+  } catch (e) {
+    console.error('Save failed', e);
+    showToast('⚠️ No se pudo guardar en este dispositivo (¿almacenamiento lleno?)');
+    return false;
+  }
   scheduleDriveBackup();
+  return true;
 }
-
+function save() {
+  persist();
+  updateCounts();
+}
 function updateCounts() {
   document.getElementById('count-all').textContent = books.length;
   document.getElementById('count-es').textContent = books.filter(b => b.lang === 'es').length;
@@ -1035,13 +1145,12 @@ function updateCounts() {
   updateGenres();
   updateStats();
 }
-
 function updateGenres() {
   const genres = [...new Set(books.map(b => b.genre).filter(Boolean))];
-  const el = document.getElementById('genres-list');
-  el.innerHTML = genres.map(g => `<span class="genre-tag" onclick="setGenreFilter('${g}',this);closeSidebar()">${g}</span>`).join('');
+  $('genres-list').innerHTML = genres.map(g =>
+    `<button type="button" class="genre-tag${currentFilter === 'genre:' + g ? ' active' : ''}" data-genre="${esc(g)}" onclick="setGenreFilter(this.dataset.genre,this);closeSidebar()">${esc(g)}</button>`
+  ).join('');
 }
-
 function updateStats() {
   const total = books.length;
   const finished = books.filter(b => b.status === 'finished').length;
@@ -1055,16 +1164,15 @@ function updateStats() {
     <div class="stat-card"><div class="stat-label">Progreso</div><div class="stat-value">${avgPct}%</div><div class="stat-sub">promedio general</div></div>
   `;
 }
-
 function setFilter(f, el) {
   currentFilter = f;
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
   if (el) el.classList.add('active');
+  document.querySelectorAll('.genre-tag').forEach(t => t.classList.remove('active'));
   const titles = { all: 'Mi Biblioteca', es: 'Libros en Español', en: 'Books in English', reading: 'Leyendo Ahora', finished: 'Libros Terminados' };
   document.getElementById('section-title').textContent = titles[f] || 'Mi Biblioteca';
   renderBooks();
 }
-
 function setGenreFilter(g, el) {
   currentFilter = 'genre:' + g;
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -1073,16 +1181,13 @@ function setGenreFilter(g, el) {
   document.getElementById('section-title').textContent = g;
   renderBooks();
 }
-
 function mobileFilter(f, btn) {
   document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   const map = { all: 'nav-all', reading: 'nav-reading', finished: 'nav-finished' };
   setFilter(f, document.getElementById(map[f]));
 }
-
 function filterBooks() { renderBooks(); }
-
 function getFilteredBooks() {
   const q = document.getElementById('search-input').value.toLowerCase();
   let filtered = books;
@@ -1094,64 +1199,64 @@ function getFilteredBooks() {
   if (q) filtered = filtered.filter(b => b.title.toLowerCase().includes(q) || (b.author||'').toLowerCase().includes(q) || (b.genre||'').toLowerCase().includes(q));
   return filtered;
 }
-
 function getLangFlag(lang) {
   const flags = { es: '🇪🇸', en: '🇺🇸', fr: '🇫🇷', pt: '🇧🇷', de: '🇩🇪' };
   return flags[lang] || '🌐';
 }
-
 function getStatusLabel(s) {
   if (s === 'reading') return '📖 Leyendo';
   if (s === 'finished') return '✅ Terminado';
   return '📋 Por leer';
 }
-
+function bookCardHTML(b) {
+  const id = esc(b.id);
+  const title = esc(b.title);
+  const author = esc(b.author || '');
+  const genre = esc(b.genre || '');
+  const photo = safeUrl(b.coverUrl);
+  const isDrive = !!(b.driveUrl && b.driveUrl.trim());
+  const timesRead = b.timesRead || 0;
+  const progress = clampPct(b.progress);
+  const coverStyle = `background-color:${safeColor(b.color)};` + (photo ? `background-image:url('${esc(cssUrl(photo))}');` : '');
+  const coverClass = photo ? 'book-cover has-photo' : 'book-cover';
+  const readLabel = isDrive ? 'Abrir' : 'Leer';
+  return `
+    <div class="book-card" id="card-${id}">
+      <div class="book-cover-wrap" data-action="open" data-id="${id}" aria-hidden="true">
+        <div class="${coverClass}" style="${coverStyle}">
+          ${photo ? '<div class="book-cover-overlay"></div>' : '<div class="book-cover-spine"></div>'}
+          ${photo ? '' : `<div class="book-cover-icon">${esc(b.emoji || '📖')}</div>`}
+          <div class="book-cover-title">${title}</div>
+          <div class="book-cover-author">${author}</div>
+          <div class="book-progress-bar"><div class="book-progress-fill" style="width:${progress}%"></div></div>
+        </div>
+        <div class="book-lang-badge">${getLangFlag(b.lang)}</div>
+        ${timesRead > 0 ? `<div class="book-times-badge">📖×${esc(timesRead)}</div>` : ''}
+        ${isDrive ? '<div class="book-drive-badge">Drive</div>' : ''}
+      </div>
+      <div class="book-info">
+        <div class="book-title" title="${title}">${title}</div>
+        <div class="book-author">${author || 'Autor desconocido'}${genre ? ' · ' + genre : ''}</div>
+        <div class="book-status">${getStatusLabel(b.status)}${progress > 0 && b.status !== 'finished' ? ' · ' + progress + '%' : ''}${timesRead > 0 ? ' · leído ' + esc(timesRead) + 'x' : ''}<span class="list-only"> · ${getLangFlag(b.lang)}${isDrive ? ' · ☁️ Drive' : ''}</span></div>
+      </div>
+      <div class="book-actions">
+        <button type="button" class="btn-sm" data-action="open" data-id="${id}" aria-label="${readLabel}: ${title}">${isDrive ? '📂 Abrir' : 'Leer'}</button>
+        <button type="button" class="btn-sm" data-action="edit" data-id="${id}" aria-label="Editar: ${title}" title="Editar">✏️</button>
+        <button type="button" class="btn-sm danger" data-action="delete" data-id="${id}" aria-label="Eliminar: ${title}" title="Eliminar">🗑️</button>
+      </div>
+    </div>`;
+}
 function renderBooks() {
   const filtered = getFilteredBooks();
-  const grid = document.getElementById('books-grid');
+  const grid = $('books-grid');
+  grid.classList.toggle('is-list', viewMode === 'list');
   if (filtered.length === 0) {
     grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><h3>No hay libros aquí</h3><p style="font-size:13px;margin-top:8px;">Agrega tu primer libro con el botón de arriba</p></div>`;
     return;
   }
-  grid.innerHTML = filtered.map(b => {
-    const hasCover = b.coverUrl && b.coverUrl.trim();
-    const isDrive = b.driveUrl && b.driveUrl.trim();
-    const timesRead = b.timesRead || 0;
-    const coverStyle = hasCover ? `background-image:url('${b.coverUrl}');background:${b.color};` : `background:${b.color};`;
-    const coverClass = hasCover ? 'book-cover has-photo' : 'book-cover';
-    const timesReadBadge = timesRead > 0 ? `<div class="book-times-badge">📖×${timesRead}</div>` : '';
-    const driveBadge = isDrive ? `<div style="position:absolute;bottom:12px;right:8px;background:rgba(66,133,244,0.85);color:#fff;font-size:8px;padding:2px 5px;border-radius:4px;font-weight:600;letter-spacing:0.04em;">Drive</div>` : '';
-    return `
-    <div class="book-card" id="card-${b.id}">
-      <div class="book-cover-wrap" onclick="openReader(${b.id})">
-        <div class="${coverClass}" style="${coverStyle}">
-          ${hasCover ? '<div class="book-cover-overlay"></div>' : ''}
-          ${!hasCover ? '<div class="book-cover-spine"></div>' : ''}
-          ${!hasCover ? `<div class="book-cover-icon">${b.emoji || '📖'}</div>` : ''}
-          <div class="book-cover-title">${b.title}</div>
-          <div class="book-cover-author">${b.author || ''}</div>
-          <div class="book-progress-bar"><div class="book-progress-fill" style="width:${b.progress||0}%"></div></div>
-        </div>
-        <div class="book-lang-badge">${getLangFlag(b.lang)}</div>
-        ${timesReadBadge}
-        ${driveBadge}
-      </div>
-      <div class="book-info">
-        <div class="book-title" title="${b.title}">${b.title}</div>
-        <div class="book-author">${b.author || 'Autor desconocido'} ${b.genre ? '· ' + b.genre : ''}</div>
-        <div style="font-size:10px;color:var(--text3);margin-top:3px;">${getStatusLabel(b.status)}${b.progress > 0 && b.status !== 'finished' ? ' · ' + b.progress + '%' : ''}${timesRead > 0 ? ' · leído ' + timesRead + 'x' : ''}</div>
-      </div>
-      <div class="book-actions">
-        <button class="btn-sm" onclick="openReader(${b.id})">${isDrive ? '📂 Abrir' : 'Leer'}</button>
-        <button class="btn-sm" onclick="openEditModal(${b.id})">✏️</button>
-        <button class="btn-sm danger" onclick="deleteBook(${b.id})">🗑️</button>
-      </div>
-    </div>`;
-  }).join('');
+  grid.innerHTML = filtered.map(bookCardHTML).join('');
 }
-
 function renderAll() { renderBooks(); updateCounts(); }
-
 function openAddModal() {
   editingId = null;
   selectedColor = COLORS[0]; selectedEmoji = EMOJIS[0];
@@ -1171,7 +1276,6 @@ function openAddModal() {
   updateCoverPreview('', selectedEmoji);
   document.getElementById('modal-overlay').classList.add('open');
 }
-
 function openEditModal(id) {
   const b = books.find(b => b.id === id);
   if (!b) return;
@@ -1194,10 +1298,8 @@ function openEditModal(id) {
   updateCoverPreview(b.coverUrl || '', b.emoji);
   document.getElementById('modal-overlay').classList.add('open');
 }
-
 function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
 function handleOverlayClick(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
-
 /* Convert Google Drive share URL to embed/preview URL */
 function driveUrlToEmbed(url) {
   if (!url) return null;
@@ -1214,17 +1316,14 @@ function driveUrlToEmbed(url) {
   if (m2) return `https://drive.google.com/file/d/${m2[1]}/preview`;
   return url; // fallback
 }
-
 function saveBook() {
   const title = document.getElementById('f-title').value.trim();
   const content = document.getElementById('f-content').value.trim();
   const driveUrl = document.getElementById('f-drive-url').value.trim();
   const coverUrl = document.getElementById('f-cover-url').value.trim();
-
   if (!title) { showToast('Por favor ingresa un título'); return; }
   if (activeContentTab === 'text' && !content) { showToast('Por favor agrega el contenido del libro'); return; }
   if (activeContentTab === 'drive' && !driveUrl) { showToast('Por favor ingresa el enlace de Google Drive'); return; }
-
   const bookData = {
     title,
     author: document.getElementById('f-author').value.trim(),
@@ -1237,7 +1336,6 @@ function saveBook() {
     color: selectedColor,
     emoji: selectedEmoji
   };
-
   if (editingId) {
     const idx = books.findIndex(b => b.id === editingId);
     if (idx > -1) {
@@ -1251,7 +1349,6 @@ function saveBook() {
   }
   save(); renderAll(); closeModal();
 }
-
 function deleteBook(id) {
   if (!confirm('¿Eliminar este libro de tu biblioteca?')) return;
   books = books.filter(b => b.id !== id);
@@ -1259,111 +1356,117 @@ function deleteBook(id) {
   if (currentBookId === id) closeReader();
   showToast('🗑️ Libro eliminado');
 }
-
 /* ── READER ── */
+function isEditableTarget(t) {
+  return !!t && (t.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName));
+}
+/* While focus mode is on, the dashboard behind the reader is inert (no tab stops, hidden from screen readers). */
+function syncReaderBackground() {
+  const inertOn = $('reader-view').classList.contains('open') && readerFocus;
+  ['app', 'mobile-nav'].forEach((id) => { const el = $(id); if (el) el.toggleAttribute('inert', inertOn); });
+}
+function setReaderFocus(on, remember) {
+  readerFocus = !!on;
+  const rv = $('reader-view');
+  rv.classList.toggle('focus', readerFocus);
+  rv.setAttribute('aria-modal', String(readerFocus));
+  $('reader-focus-btn').setAttribute('aria-pressed', String(readerFocus));
+  if (remember) lsSet(LS.focus, readerFocus ? '1' : '0');
+  syncReaderBackground();
+}
+function toggleReaderFocus() { setReaderFocus(!readerFocus, true); }
+function applyReaderTheme() {
+  $('reader-view').classList.toggle('night', readerNight);
+  const btn = $('reader-theme-btn');
+  btn.textContent = readerNight ? '☀️ Día' : '☽ Noche';
+  btn.setAttribute('aria-pressed', String(readerNight));
+}
 function openReader(id) {
   const b = books.find(b => b.id === id);
   if (!b) return;
+  const rv = $('reader-view');
+  if (!rv.classList.contains('open')) lastFocusEl = document.activeElement;
+  closeSidebar();
   currentBookId = id;
-
-  // Set title
-  document.getElementById('reader-title').textContent = b.title + (b.author ? ' — ' + b.author : '');
-
+  $('reader-title').textContent = b.title + (b.author ? ' — ' + b.author : '');
   const isDrive = b.driveUrl && b.driveUrl.trim();
-
-  // Show/hide appropriate panels
-  const textContent = document.getElementById('reader-content');
-  const driveArea = document.getElementById('reader-drive-area');
-  const footer = document.getElementById('reader-footer');
-  const fontCtrl = document.getElementById('font-size-ctrl');
-  const finishBanner = document.getElementById('finish-banner');
-  const themBtn = document.getElementById('reader-theme-btn');
-
+  const textContent = $('reader-content');
+  const driveArea = $('reader-drive-area');
+  const footer = $('reader-footer');
+  const fontCtrl = $('font-size-ctrl');
+  const finishBanner = $('finish-banner');
+  const themBtn = $('reader-theme-btn');
   if (isDrive) {
-    // Drive mode
     textContent.style.display = 'none';
     driveArea.style.display = 'flex';
     footer.style.display = 'none';
     fontCtrl.style.display = 'none';
     themBtn.style.display = 'none';
-
     const embedUrl = driveUrlToEmbed(b.driveUrl);
-    const driveMsg = document.getElementById('reader-drive-msg');
-    const driveFrame = document.getElementById('reader-drive-frame');
-    const openLink = document.getElementById('drive-open-link');
-    document.getElementById('drive-book-title').textContent = b.title;
+    const driveMsg = $('reader-drive-msg');
+    const driveFrame = $('reader-drive-frame');
+    const openLink = $('drive-open-link');
+    $('drive-book-title').textContent = b.title;
     openLink.href = b.driveUrl;
-
-    // Try to embed
     driveMsg.style.display = 'flex';
     driveFrame.style.display = 'none';
     driveFrame.src = '';
-    // Attempt iframe load
     driveFrame.onload = function() {
-      try {
-        // Show iframe once loaded
-        driveFrame.style.display = 'block';
-        driveMsg.style.display = 'none';
-      } catch(e) {}
+      driveFrame.style.display = 'block';
+      driveMsg.style.display = 'none';
     };
     driveFrame.onerror = function() {
       driveFrame.style.display = 'none';
       driveMsg.style.display = 'flex';
     };
     setTimeout(() => {
+      if (currentBookId !== id) return; // reader was closed meanwhile
       driveFrame.src = embedUrl;
-      // Show frame after short delay; keep msg visible until it loads
       setTimeout(() => {
+        if (currentBookId !== id) return;
         driveFrame.style.display = 'block';
         driveMsg.style.display = 'none';
       }, 1800);
     }, 100);
-
-    // Show finish banner always for drive books (user confirms manually)
     const timesRead = b.timesRead || 0;
-    document.getElementById('finish-banner-sub').textContent =
+    $('finish-banner-sub').textContent =
       timesRead > 0 ? `Ya lo leíste ${timesRead} ${timesRead === 1 ? 'vez' : 'veces'}` : 'Primera vez que lo lees';
     finishBanner.classList.add('visible');
-
   } else {
-    // Text mode
     textContent.style.display = '';
     driveArea.style.display = 'none';
     footer.style.display = '';
     fontCtrl.style.display = '';
     themBtn.style.display = '';
-
-    const paragraphs = b.content.split('\n').filter(p => p.trim());
-    const paper = document.getElementById('reader-paper');
-    paper.innerHTML = `<div class="reader-chapter-title">${b.emoji || '📖'} ${b.title}</div>` + paragraphs.map(p => `<p>${p}</p>`).join('');
+    const paragraphs = (b.content || '').split('\n').filter(p => p.trim());
+    readerWordCount = paragraphs.join(' ').split(/\s+/).filter(Boolean).length;
+    const paper = $('reader-paper');
+    paper.innerHTML = `<h1 class="reader-chapter-title">${esc(b.emoji || '📖')} ${esc(b.title)}</h1>` + paragraphs.map(p => `<p>${esc(p)}</p>`).join('');
     paper.style.fontSize = currentFontSize + 'px';
     const savedScroll = b.scrollTop || 0;
     setTimeout(() => { textContent.scrollTop = savedScroll; updateReadingProgress(); }, 50);
-
-    // Show finish banner when near end
     updateFinishBanner(b);
   }
-
-  document.getElementById('reader-view').classList.add('open');
+  applyReaderTheme();
+  rv.classList.add('open');
+  setReaderFocus(readerFocus, false);
+  $('reader-close-btn').focus({ preventScroll: true });
   if (b.status === 'unread') { b.status = 'reading'; save(); renderAll(); }
 }
-
 function updateFinishBanner(b) {
-  const finishBanner = document.getElementById('finish-banner');
-  // For text books: show when progress >= 85%
+  const finishBanner = $('finish-banner');
   if (!b) { finishBanner.classList.remove('visible'); return; }
-  if (b.driveUrl) return; // handled in openReader for drive books
+  if (b.driveUrl) return;
   const pct = b.progress || 0;
   const timesRead = b.timesRead || 0;
   if (pct >= 85) {
-    document.getElementById('finish-banner-sub').textContent =
+    $('finish-banner-sub').textContent =
       timesRead > 0 ? `Ya lo leíste ${timesRead} ${timesRead === 1 ? 'vez' : 'veces'} — ¿otra ronda?` : 'Primera vez que lo completas';
     finishBanner.classList.add('visible');
   } else {
     finishBanner.classList.remove('visible');
   }
 }
-
 function confirmFinished() {
   if (!currentBookId) return;
   const b = books.find(b => b.id === currentBookId);
@@ -1375,84 +1478,76 @@ function confirmFinished() {
   const times = b.timesRead;
   const msg = times === 1 ? '¡Primer libro completado! 🎉' : `¡Leído ${times} veces! 🏆`;
   showToast(`${msg} "${b.title}" marcado como terminado`);
-  // Update banner text
-  document.getElementById('finish-banner-sub').textContent = `Leído ${times} ${times === 1 ? 'vez' : 'veces'} en total — ¡felicidades!`;
+  $('finish-banner-sub').textContent = `Leído ${times} ${times === 1 ? 'vez' : 'veces'} en total — ¡felicidades!`;
 }
-
 function closeReader() {
-  document.getElementById('reader-view').classList.remove('open');
-  // Clear drive frame src to stop loading
-  document.getElementById('reader-drive-frame').src = '';
+  const rv = $('reader-view');
+  if (!rv.classList.contains('open')) return;
+  flushProgress();
+  const closedId = currentBookId;
+  rv.classList.remove('open');
+  syncReaderBackground();
+  $('reader-drive-frame').src = '';
   currentBookId = null;
+  renderAll(); // refresh cards/stats once, instead of on every scroll tick
+  const card = closedId != null ? document.querySelector(`#card-${CSS.escape(String(closedId))} [data-action="open"]`) : null;
+  const target = card || (lastFocusEl && lastFocusEl.isConnected ? lastFocusEl : null);
+  if (target && typeof target.focus === 'function') target.focus({ preventScroll: true });
 }
-
+/* Scrolling only mutates memory + the progress bar; disk writes are debounced. */
+function scheduleProgressSave() {
+  clearTimeout(progressTimer);
+  progressTimer = setTimeout(flushProgress, 800);
+}
+function flushProgress() {
+  if (progressTimer === null) return;
+  clearTimeout(progressTimer);
+  progressTimer = null;
+  persist();
+}
 function updateReadingProgress() {
-  const content = document.getElementById('reader-content');
+  const content = $('reader-content');
   const { scrollTop, scrollHeight, clientHeight } = content;
   const max = scrollHeight - clientHeight;
-  const pct = max > 0 ? Math.round((scrollTop / max) * 100) : 0;
-  document.getElementById('reader-progress-fill').style.width = pct + '%';
-  document.getElementById('reader-page-info').textContent = pct + '%';
-  const wpm = 200;
-  const words = document.getElementById('reader-paper').textContent.split(/\s+/).length;
-  const remaining = Math.max(0, Math.round(words * (1 - pct/100) / wpm));
-  document.getElementById('reader-time-left').textContent = remaining > 0 ? `~${remaining} min restantes` : '¡Terminado!';
-  if (currentBookId) {
-    const b = books.find(b => b.id === currentBookId);
-    if (b) {
-      b.progress = pct; b.scrollTop = scrollTop;
-      if (pct >= 95 && b.status !== 'finished') b.status = 'reading'; // don't auto-finish, let user confirm
-      save();
-      updateFinishBanner(b);
-    }
-  }
+  const pct = max > 0 ? Math.min(100, Math.round((scrollTop / max) * 100)) : 0;
+  $('reader-progress-fill').style.width = pct + '%';
+  $('reader-progress-track').setAttribute('aria-valuenow', String(pct));
+  $('reader-page-info').textContent = pct + '%';
+  const remaining = Math.max(0, Math.round(readerWordCount * (1 - pct / 100) / 200));
+  $('reader-time-left').textContent = remaining > 0 ? `~${remaining} min restantes` : '¡Terminado!';
+  if (!currentBookId || max <= 0) return; // nothing scrollable yet: never overwrite saved progress
+  const b = books.find(b => b.id === currentBookId);
+  if (!b) return;
+  b.progress = pct;
+  b.scrollTop = scrollTop;
+  updateFinishBanner(b);
+  scheduleProgressSave();
 }
-
 function changeFontSize(d) {
   currentFontSize = Math.max(14, Math.min(28, currentFontSize + d));
-  document.getElementById('reader-paper').style.fontSize = currentFontSize + 'px';
-  document.getElementById('font-size-display').textContent = currentFontSize;
+  $('reader-paper').style.fontSize = currentFontSize + 'px';
+  $('font-size-display').textContent = currentFontSize;
 }
-
 function toggleReaderTheme() {
   readerNight = !readerNight;
-  const rv = document.getElementById('reader-view');
-  const btn = document.getElementById('reader-theme-btn');
-  if (readerNight) {
-    rv.style.background = '#1a1410'; rv.style.color = '#c8b89a';
-    document.getElementById('reader-paper').style.color = '#c8b89a';
-    const ct = document.querySelector('.reader-chapter-title'); if (ct) ct.style.color = '#c8b89a';
-    document.querySelector('.reader-topbar').style.background = 'rgba(26,20,16,0.95)';
-    document.querySelector('.reader-footer').style.background = 'rgba(26,20,16,0.95)';
-    btn.textContent = '☀️ Día';
-  } else {
-    rv.style.background = ''; rv.style.color = '';
-    document.getElementById('reader-paper').style.color = '';
-    const ct = document.querySelector('.reader-chapter-title'); if (ct) ct.style.color = '';
-    document.querySelector('.reader-topbar').style.background = '';
-    document.querySelector('.reader-footer').style.background = '';
-    btn.textContent = '☽ Noche';
-  }
+  lsSet(LS.night, readerNight ? '1' : '0');
+  applyReaderTheme();
 }
-
 let lightMode = false;
 function toggleTheme() {
   lightMode = !lightMode;
   document.body.classList.toggle('light-mode', lightMode);
   document.getElementById('theme-btn').title = lightMode ? 'Modo oscuro' : 'Modo claro';
 }
-
-function setViewMode(mode) {
-  const grid = document.getElementById('books-grid');
-  if (mode === 'list') {
-    grid.style.gridTemplateColumns = '1fr';
-    grid.querySelectorAll('.book-card').forEach(c => c.style.display = 'flex');
-  } else {
-    grid.style.gridTemplateColumns = '';
-    grid.querySelectorAll('.book-card').forEach(c => c.style.display = '');
-  }
+function syncViewToggle() {
+  ['grid', 'list'].forEach((m) => $('view-' + m).setAttribute('aria-pressed', String(viewMode === m)));
 }
-
+function setViewMode(mode) {
+  viewMode = mode === 'list' ? 'list' : 'grid';
+  lsSet(LS.view, viewMode);
+  syncViewToggle();
+  renderBooks();
+}
 /* ── SIDEBAR MOBILE TOGGLE ── */
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
@@ -1468,7 +1563,6 @@ function closeSidebar() {
     document.getElementById('sidebar-overlay').classList.remove('open');
   }
 }
-
 /* ── EXPORT ── */
 function exportLibrary() {
   const data = { version: '1.0', exportedAt: new Date().toISOString(), books };
@@ -1483,13 +1577,11 @@ function exportLibrary() {
   showToast(`📤 Exportados ${books.length} libros`);
   closeSidebar();
 }
-
 /* ── IMPORT ── */
 function triggerImport() {
   document.getElementById('import-file-input').click();
   closeSidebar();
 }
-
 function importLibrary(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -1517,21 +1609,18 @@ function importLibrary(event) {
   };
   reader.readAsText(file);
 }
-
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3500);
 }
-
 /* ══════════════════════════════════════════════════════
    GOOGLE DRIVE BACKUP MODULE
    Backup, not sync: localStorage (biblioteca_books) is always
    the source of truth. Drive only ever gets pushed TO, and is
    only ever pulled FROM on an explicit, confirmed user action.
    ══════════════════════════════════════════════════════ */
-
 const DRIVE_CONFIG = {
   // Replace with your OAuth Client ID from Google Cloud Console (see README setup section).
   CLIENT_ID: '685955252889-099oq519mdlmvg57i9c39crt47o3rs1s.apps.googleusercontent.com',
@@ -1540,7 +1629,6 @@ const DRIVE_CONFIG = {
   RECONNECT_FLAG: 'biblioteca_drive_connected',
   DEBOUNCE_MS: 2500,
 };
-
 const driveState = {
   tokenClient: null,
   accessToken: null,
@@ -1554,11 +1642,9 @@ const driveState = {
   debounceTimer: null,
   errorMsg: null,
 };
-
 function driveConfigured() {
   return DRIVE_CONFIG.CLIENT_ID && !DRIVE_CONFIG.CLIENT_ID.startsWith('YOUR_GOOGLE_CLIENT_ID');
 }
-
 function driveGetTokenClient() {
   if (!driveState.tokenClient) {
     driveState.tokenClient = google.accounts.oauth2.initTokenClient({
@@ -1569,7 +1655,6 @@ function driveGetTokenClient() {
   }
   return driveState.tokenClient;
 }
-
 function driveRequestToken(silent) {
   return new Promise((resolve, reject) => {
     if (!driveConfigured()) {
@@ -1606,13 +1691,11 @@ function driveRequestToken(silent) {
     }
   });
 }
-
 async function driveGetValidToken() {
   const hasTime = driveState.accessToken && (driveState.tokenExpiresAt - Date.now() > 60000);
   if (hasTime) return driveState.accessToken;
   return driveRequestToken(true);
 }
-
 async function driveApiFetch(url, options = {}) {
   const token = await driveGetValidToken();
   const headers = Object.assign({}, options.headers, { Authorization: `Bearer ${token}` });
@@ -1624,14 +1707,12 @@ async function driveApiFetch(url, options = {}) {
   }
   return res;
 }
-
 async function driveFindFile() {
   const q = encodeURIComponent(`name = '${DRIVE_CONFIG.FILENAME}' and trashed = false`);
   const res = await driveApiFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name,modifiedTime)&spaces=drive`);
   const data = await res.json();
   return (data.files && data.files.length > 0) ? data.files[0] : null;
 }
-
 async function driveCreateFile(payload) {
   const boundary = 'biblioteca_boundary_' + Date.now();
   const metadata = { name: DRIVE_CONFIG.FILENAME, mimeType: 'application/json' };
@@ -1647,7 +1728,6 @@ async function driveCreateFile(payload) {
   const data = await res.json();
   return data.id;
 }
-
 async function driveUpdateFile(fileId, payload) {
   await driveApiFetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
     method: 'PATCH',
@@ -1655,16 +1735,13 @@ async function driveUpdateFile(fileId, payload) {
     body: JSON.stringify(payload),
   });
 }
-
 async function driveDownloadFile(fileId) {
   const res = await driveApiFetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
   return res.json();
 }
-
 function buildBackupPayload() {
   return { version: '1.0', exportedAt: new Date().toISOString(), books };
 }
-
 async function pushToDrive() {
   if (driveState.pushInFlight) { driveState.pushQueued = true; return; }
   driveState.pushInFlight = true;
@@ -1692,13 +1769,11 @@ async function pushToDrive() {
     }
   }
 }
-
 function scheduleDriveBackup() {
   if (!driveState.connected) return;
   clearTimeout(driveState.debounceTimer);
   driveState.debounceTimer = setTimeout(() => { pushToDrive(); }, DRIVE_CONFIG.DEBOUNCE_MS);
 }
-
 async function driveBackupNow() {
   if (!driveState.connected) return;
   clearTimeout(driveState.debounceTimer);
@@ -1707,7 +1782,6 @@ async function driveBackupNow() {
   if (!driveState.errorMsg) showToast('☁️ Biblioteca respaldada en Google Drive');
   updateDrivePillUI();
 }
-
 async function driveConnect() {
   if (!driveConfigured()) {
     showToast('⚠️ Google Drive aún no está configurado — revisa el README para agregar tu Client ID.');
@@ -1750,7 +1824,6 @@ async function driveConnect() {
     updateDrivePillUI();
   }
 }
-
 function driveDisconnect() {
   try {
     if (driveState.accessToken && google.accounts && google.accounts.oauth2) {
@@ -1767,7 +1840,6 @@ function driveDisconnect() {
   updateDrivePillUI();
   showToast('🔌 Google Drive desconectado — tus libros permanecen solo en este dispositivo');
 }
-
 async function driveRestore() {
   if (!driveState.connected) return;
   const ok = confirm('Esto reemplazará TODOS los libros de este dispositivo con la copia guardada en Google Drive. ¿Continuar?');
@@ -1788,7 +1860,6 @@ async function driveRestore() {
     updateDrivePillUI();
   }
 }
-
 function applyRestoredBooks(payload) {
   // Handle both the current shape ({version, exportedAt, books}) and a bare array (legacy/manual exports).
   const incoming = Array.isArray(payload) ? payload : (payload && Array.isArray(payload.books) ? payload.books : null);
@@ -1799,7 +1870,6 @@ function applyRestoredBooks(payload) {
   localStorage.setItem('biblioteca_books', JSON.stringify(books));
   renderAll();
 }
-
 async function driveTryAutoReconnect() {
   if (localStorage.getItem(DRIVE_CONFIG.RECONNECT_FLAG) !== '1') return;
   if (!driveConfigured()) return;
@@ -1817,7 +1887,6 @@ async function driveTryAutoReconnect() {
     updateDrivePillUI('error');
   }
 }
-
 /* ── DRIVE UI ── */
 function driveRelativeTime(ts) {
   if (!ts) return '';
@@ -1829,7 +1898,6 @@ function driveRelativeTime(ts) {
   if (hrs < 24) return `hace ${hrs} h`;
   return `hace ${Math.round(hrs / 24)} d`;
 }
-
 function updateDrivePillUI(forceState) {
   const pill = document.getElementById('drive-pill');
   const label = document.getElementById('drive-pill-label');
@@ -1858,7 +1926,6 @@ function updateDrivePillUI(forceState) {
   btnRestore.style.display = driveState.connected ? 'flex' : 'none';
   btnDisconnect.style.display = driveState.connected ? 'flex' : 'none';
 }
-
 function toggleDriveMenu() {
   document.getElementById('drive-menu').classList.toggle('open');
 }
@@ -1882,20 +1949,28 @@ function driveMenuAction(action) {
 function showReconnectBanner() {
   document.getElementById('app').classList.add('has-reconnect-banner');
   document.getElementById('drive-reconnect-banner').classList.add('show');
+  syncBannerHeight();
 }
 function dismissReconnectBanner() {
   document.getElementById('app').classList.remove('has-reconnect-banner');
   document.getElementById('drive-reconnect-banner').classList.remove('show');
+  syncBannerHeight();
 }
-
 document.addEventListener('keydown', e => {
+  const readerOpen = $('reader-view').classList.contains('open');
   if (e.key === 'Escape') {
-    if (document.getElementById('modal-overlay').classList.contains('open')) closeModal();
-    else if (document.getElementById('reader-view').classList.contains('open')) closeReader();
+    if ($('modal-overlay').classList.contains('open')) closeModal();
+    else if (readerOpen) closeReader();
     else closeSidebar();
+    return;
+  }
+  if ((e.key === 'f' || e.key === 'F') && readerOpen && !e.ctrlKey && !e.metaKey && !e.altKey && !isEditableTarget(e.target)) {
+    e.preventDefault();
+    toggleReaderFocus();
   }
 });
-
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushProgress(); });
+window.addEventListener('pagehide', flushProgress);
 init();
 </script>
 </body>
